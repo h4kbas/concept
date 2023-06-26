@@ -93,14 +93,22 @@ export class Block {
 
           const inferredPairState =
             this.blockExplorer.calculateCurrentPairState({
-              conceptA: conceptA,
+              conceptA,
               conceptB: dependentPair.conceptB,
             });
+          const currentPairState = this.blockExplorer.calculateCurrentPairState(
+            {
+              conceptA,
+              conceptB: dependentPair.conceptA,
+            }
+          );
           if (dependentPairState !== null && inferredPairState === null) {
             this.addToChain(
               conceptA,
               dependentPair.conceptB,
-              dependentPairState
+              currentPairState === true
+                ? dependentPairState
+                : !dependentPairState
             );
           }
         }
