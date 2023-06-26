@@ -12,14 +12,9 @@ export const hookMap: HookMap = {
 
       const [a, _, ...b] = params;
       // D is is A B C
-      if (b.length > 1) {
-        const res = block.parseLine(b);
-        if (res) {
-          block.addToChain(a, res, true);
-        }
-      } else {
-        // A is B
-        block.addToChain(a, b[0], true);
+      const res = block.parseLine(b);
+      if (res) {
+        block.addToChain(a, res, true);
       }
     }
     // is A B C
