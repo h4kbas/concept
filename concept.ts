@@ -74,30 +74,33 @@ export class Block {
     this.pairs.forEach((pair, index) => {
       const { conceptA, conceptB } = pair;
       const dependentPair = this.pairs.find(
-        (p) => conceptA.name === p.conceptB.name
+        (p) => conceptB.name === p.conceptA.name
       );
       if (dependentPair) {
+        if (dependentPair.conceptB.name === conceptA.name) {
+          return;
+        }
         const isInferredPairAvailable = this.isPairAvailable(
-          dependentPair.conceptA,
-          conceptB
+          dependentPair.conceptB,
+          conceptA
         );
         if (!isInferredPairAvailable) {
           const dependentPairState =
             this.blockExplorer.calculateCurrentPairState({
-              conceptA: dependentPair.conceptB,
-              conceptB,
+              conceptA: dependentPair.conceptA,
+              conceptB: dependentPair.conceptB,
             });
 
-          if (dependentPairState !== null) {
+          const inferredPairState =
+            this.blockExplorer.calculateCurrentPairState({
+              conceptA: conceptA,
+              conceptB: dependentPair.conceptB,
+            });
+          if (dependentPairState !== null && inferredPairState === null) {
             this.addToChain(
-              dependentPair.conceptA,
-              conceptB,
+              conceptA,
+              dependentPair.conceptB,
               dependentPairState
-            );
-          } else {
-            const inferredPair = this.addPairToChain(
-              dependentPair.conceptA,
-              conceptB
             );
           }
         }
