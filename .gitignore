@@ -175,5 +175,3 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,node
-*.concept
-test.json

@@ -1,7 +1,10 @@
 import fs from "fs";
-import { Block, BlockExplorer, HookMap } from "./concept";
+import { Block, HookMap } from "./concept";
 
-const text = fs.readFileSync("input.concept", "utf-8");
+const [_, __, ...args] = process.argv;
+const [input, output] = args;
+
+const text = fs.readFileSync(input, "utf-8");
 
 export const hookMap: HookMap = {
   is: (params) => {
@@ -72,7 +75,7 @@ block.parse(tokens);
 
 const result = block.serialize();
 
-fs.writeFileSync("output.concept", result, {
+fs.writeFileSync(output || "output.concept", result, {
   encoding: "utf-8",
   flag: "w",
 });
