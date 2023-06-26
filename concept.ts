@@ -1,5 +1,7 @@
+import { v4 as uuidv4 } from "uuid";
 export interface Concept {
   name: string;
+  uuid: string;
 }
 
 export interface Pair {
@@ -36,6 +38,7 @@ export class Block {
     let c = this.concepts.find((c) => c.name === concept.name);
     if (!c) {
       c = concept;
+      concept.uuid = uuidv4();
       this.concepts.push(concept);
     }
     return c;
@@ -144,6 +147,7 @@ export class Block {
           .trim()
           .split(" ")
           .map((str) => ({ name: str } as Concept))
+          .filter((c) => c.name !== "")
       );
   }
 
@@ -160,6 +164,13 @@ export class Block {
       def.value
         ? ret.push(`${def.pair.conceptA.name} is ${def.pair.conceptB.name}`)
         : ret.push(`${def.pair.conceptA.name} isnt ${def.pair.conceptB.name}`);
+    }
+    return ret.join("\n");
+  }
+  serializeConceptLib() {
+    const ret: string[] = [];
+    for (let c of this.concepts) {
+      ret.push(`${c.name} is ${c.uuid}`);
     }
     return ret.join("\n");
   }
