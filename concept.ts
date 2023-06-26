@@ -22,12 +22,14 @@ export class Block {
   chain: Data[];
 
   hookMap: HookMap;
+  blockExplorer: BlockExplorer;
 
   constructor({ concepts = [], pairs = [], chain = [], hookMap = {} }) {
     this.concepts = concepts;
     this.pairs = pairs;
     this.chain = chain;
     this.hookMap = hookMap;
+    this.blockExplorer = new BlockExplorer(this);
   }
 
   addConceptToChain(concept: Concept) {
@@ -39,11 +41,14 @@ export class Block {
     return c;
   }
 
-  addPairToChain(conceptA: Concept, conceptB: Concept) {
-    let pair = this.pairs.find(
+  isPairAvailable(conceptA: Concept, conceptB: Concept) {
+    return this.pairs.find(
       (p) =>
-        p.conceptA.name === conceptA.name && p.conceptB.name === conceptA.name
+        p.conceptA.name === conceptA.name && p.conceptB.name === conceptB.name
     );
+  }
+  addPairToChain(conceptA: Concept, conceptB: Concept) {
+    let pair = this.isPairAvailable(conceptA, conceptB);
     if (!pair) {
       this.addConceptToChain(conceptA);
       this.addConceptToChain(conceptB);
@@ -65,9 +70,39 @@ export class Block {
     this.chain.push(data);
   }
 
-  interMissingPairValues() {}
-
-  inferMissingPairs() {}
+  inferMissingPairs() {
+    this.pairs.forEach((pair, index) => {
+      const { conceptA, conceptB } = pair;
+      const dependentPair = this.pairs.find(
+        (p) => conceptA.name === p.conceptB.name
+      );
+      if (dependentPair) {
+        const isInferredPairAvailable = this.isPairAvailable(
+          dependentPair.conceptA,
+          conceptB
+        );
+        if (!isInferredPairAvailable) {
+          const dependentPairState =
+            this.blockExplorer.calculateCurrentPairState({
+              conceptA: dependentPair.conceptA,
+              conceptB: dependentPair.conceptB,
+            });
+          if (dependentPairState !== null) {
+            this.addToChain(
+              dependentPair.conceptA,
+              conceptB,
+              dependentPairState
+            );
+          } else {
+            const inferredPair = this.addPairToChain(
+              dependentPair.conceptA,
+              conceptB
+            );
+          }
+        }
+      }
+    });
+  }
 
   calculateHookResult(token: Concept, line: Concept[]) {
     const ret = this.hookMap[token.name](line);
@@ -103,6 +138,7 @@ export class Block {
   parse(tokens: Concept[][]) {
     tokens.forEach((line) => {
       this.parseLine(line);
+      this.inferMissingPairs();
     });
   }
 

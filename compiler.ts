@@ -23,11 +23,10 @@ export const hookMap: HookMap = {
         throw new Error("Is is used: is A B C");
       }
       const [_, a, b, ...c] = params;
-      const pairState = blockExplorer.calculateCurrentPairState({
+      const pairState = block.blockExplorer.calculateCurrentPairState({
         conceptA: a,
         conceptB: b,
       });
-      console.log(pairState ? c : []);
       return pairState ? c : [];
     }
   },
@@ -39,20 +38,21 @@ export const hookMap: HookMap = {
 
     block.addToChain(a, b, false);
   },
+  say: (params) => {
+    if (params.length < 2) {
+      throw new Error("Say is used: say A");
+    }
+    const [_, ...a] = params;
+    console.log(a.map((c) => c.name).join(" "));
+  },
 };
 
 const block = new Block({ hookMap });
-const blockExplorer = new BlockExplorer(block);
 
 const tokens = block.tokenize(text);
 block.parse(tokens);
 
 const result = block.serialize();
-
-fs.writeFileSync("test.json", JSON.stringify(block, undefined, 2), {
-  encoding: "utf-8",
-  flag: "w",
-});
 
 fs.writeFileSync("output.concept", result, {
   encoding: "utf-8",
