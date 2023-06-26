@@ -42,7 +42,7 @@ export class Block {
   addPairToChain(conceptA: Concept, conceptB: Concept) {
     let pair = this.pairs.find(
       (p) =>
-        p.conceptA.name === conceptA.name || p.conceptB.name === conceptA.name
+        p.conceptA.name === conceptA.name && p.conceptB.name === conceptA.name
     );
     if (!pair) {
       this.addConceptToChain(conceptA);
@@ -64,6 +64,10 @@ export class Block {
     };
     this.chain.push(data);
   }
+
+  interMissingPairValues() {}
+
+  inferMissingPairs() {}
 
   calculateHookResult(token: Concept, line: Concept[]) {
     const ret = this.hookMap[token.name](line);
@@ -180,7 +184,7 @@ export class BlockExplorer {
         data.pair.conceptA.name === pair.conceptA.name &&
         data.pair.conceptB.name === pair.conceptB.name
       ) {
-        return (acc = data.value);
+        acc = data.value;
       }
       return acc;
     }, null as any);
