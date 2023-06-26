@@ -27,16 +27,34 @@ export const hookMap: HookMap = {
         conceptA: a,
         conceptB: b,
       });
-      return pairState ? c : [];
+      return pairState === true ? c : [];
     }
   },
   isnt: (params) => {
-    if (params.length !== 3) {
-      throw new Error("Is isnt used: A is B");
-    }
-    const [a, _, b] = params;
+    if (params[0].name !== "isnt") {
+      if (params.length < 3) {
+        throw new Error("Isnt is used: A isnt B");
+      }
 
-    block.addToChain(a, b, false);
+      const [a, _, ...b] = params;
+      // D isnt is A B C
+      const res = block.parseLine(b);
+      if (res) {
+        block.addToChain(a, res, false);
+      }
+    }
+    // isnt A B C
+    else {
+      if (params.length < 4) {
+        throw new Error("Isnt is used: isnt A B C");
+      }
+      const [_, a, b, ...c] = params;
+      const pairState = block.blockExplorer.calculateCurrentPairState({
+        conceptA: a,
+        conceptB: b,
+      });
+      return pairState === false ? c : [];
+    }
   },
   say: (params) => {
     if (params.length < 2) {

@@ -84,9 +84,10 @@ export class Block {
         if (!isInferredPairAvailable) {
           const dependentPairState =
             this.blockExplorer.calculateCurrentPairState({
-              conceptA: dependentPair.conceptA,
-              conceptB: dependentPair.conceptB,
+              conceptA: dependentPair.conceptB,
+              conceptB,
             });
+
           if (dependentPairState !== null) {
             this.addToChain(
               dependentPair.conceptA,
