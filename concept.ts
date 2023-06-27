@@ -74,38 +74,50 @@ export class Block {
     this.pairs.forEach((pair, index) => {
       const { conceptA, conceptB } = pair;
       const dependentPair = this.pairs.find(
-        (p) => conceptB.name === p.conceptA.name
+        (p) => conceptA.name === p.conceptB.name
       );
       if (dependentPair) {
-        if (dependentPair.conceptB.name === conceptA.name) {
-          return;
-        }
         const isInferredPairAvailable = this.isPairAvailable(
-          dependentPair.conceptB,
-          conceptA
+          dependentPair.conceptA,
+          conceptB
         );
+
         if (!isInferredPairAvailable) {
+          // Mela is Elma
           const dependentPairState =
             this.blockExplorer.calculateCurrentPairState({
               conceptA: dependentPair.conceptA,
               conceptB: dependentPair.conceptB,
             });
-
+          console.log(
+            "dep",
+            dependentPair.conceptA,
+            dependentPair.conceptB,
+            dependentPairState
+          );
+          // Mela is red
           const inferredPairState =
             this.blockExplorer.calculateCurrentPairState({
-              conceptA,
-              conceptB: dependentPair.conceptB,
+              conceptA: dependentPair.conceptA,
+              conceptB,
             });
+          console.log(
+            "inf",
+            dependentPair.conceptA,
+            conceptB,
+            dependentPairState
+          );
+          // Elma is red
           const currentPairState = this.blockExplorer.calculateCurrentPairState(
             {
-              conceptA,
-              conceptB: dependentPair.conceptA,
+              conceptA: dependentPair.conceptB,
+              conceptB: conceptB,
             }
           );
           if (dependentPairState !== null && inferredPairState === null) {
             this.addToChain(
-              conceptA,
-              dependentPair.conceptB,
+              dependentPair.conceptA,
+              conceptB,
               currentPairState === true
                 ? dependentPairState
                 : !dependentPairState

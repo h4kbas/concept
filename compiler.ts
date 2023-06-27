@@ -2,7 +2,7 @@ import fs from "fs";
 import { Block, Concept, HookMap } from "./concept";
 
 const [_, __, ...args] = process.argv;
-const [input, output, lib] = args;
+const [input, output] = args;
 
 const text = fs.readFileSync(`${input || "input"}.concept`, "utf-8");
 
