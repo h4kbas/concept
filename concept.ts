@@ -89,24 +89,14 @@ export class Block {
               conceptA: dependentPair.conceptA,
               conceptB: dependentPair.conceptB,
             });
-          console.log(
-            "dep",
-            dependentPair.conceptA,
-            dependentPair.conceptB,
-            dependentPairState
-          );
+
           // Mela is red
           const inferredPairState =
             this.blockExplorer.calculateCurrentPairState({
               conceptA: dependentPair.conceptA,
               conceptB,
             });
-          console.log(
-            "inf",
-            dependentPair.conceptA,
-            conceptB,
-            dependentPairState
-          );
+
           // Elma is red
           const currentPairState = this.blockExplorer.calculateCurrentPairState(
             {
