@@ -70,31 +70,12 @@ export const hookMap: HookMap = {
 
 const block = new Block({ hookMap });
 
-if (lib) {
-  const libText = lib
-    ? fs.readFileSync(`${lib || "input"}.lib.concept`, "utf-8")
-    : "";
-
-  const libTokens = block.tokenize(libText);
-  block.concepts.push(
-    ...libTokens.map<Concept>((line) => ({
-      name: line[0].name,
-      uuid: line[2].name,
-    }))
-  );
-}
 const tokens = block.tokenize(text);
 block.parse(tokens);
 
 const result = block.serialize();
-const conceptLib = block.serializeConceptLib();
 
 fs.writeFileSync(`${output || "output"}.concept`, result, {
-  encoding: "utf-8",
-  flag: "w",
-});
-
-fs.writeFileSync(`${output || "output"}.lib.concept`, conceptLib, {
   encoding: "utf-8",
   flag: "w",
 });
