@@ -81,6 +81,10 @@ export class Block {
           dependentPair.conceptA,
           conceptB
         );
+        // Mela is Mela
+        if (dependentPair.conceptA.name === conceptB.name) {
+          return;
+        }
 
         if (!isInferredPairAvailable) {
           // Mela is Elma
