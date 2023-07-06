@@ -244,4 +244,14 @@ export class BlockExplorer {
       return acc;
     }, null as any);
   }
+
+  calculateBlockState() {
+    return this.block.chain.reduce((acc, data) => {
+      if (data.value !== undefined) {
+        acc[data.pair.conceptA.name] = acc[data.pair.conceptA.name] || [];
+        acc[data.pair.conceptA.name][data.pair.conceptB.name] = data.value;
+      }
+      return acc;
+    }, {} as any);
+  }
 }
