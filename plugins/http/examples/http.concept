@@ -1,0 +1,37 @@
+# HTTP Plugin - Concept Language Syntax Demo
+# This demonstrates the new tabbed block syntax for HTTP operations
+
+# Configuration using tabbed blocks
+http config
+    port is 3000
+    host is localhost
+    cors is true
+
+# Register API endpoints using tabbed block syntax
+http endpoint GET /api/users
+    return users
+    filter active
+    sort by name
+
+http endpoint GET /api/products
+    return products
+    filter available
+    sort by price
+
+http endpoint POST /api/users
+    validate input
+    create user
+    return success
+
+http endpoint PUT /api/users/:id
+    validate input
+    update user
+    return updated
+
+http endpoint DELETE /api/users/:id
+    validate permissions
+    delete user
+    return success
+
+# Start the HTTP server
+http start

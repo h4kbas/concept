@@ -1,0 +1,28 @@
+# Simple DateTime Example
+# This shows practical use of the datetime plugin
+
+# Simulate a simple logging system
+file write ./app.log
+    Application started at 2025-09-04T16:47:00Z
+    Database connection established
+    Server listening on port 3000
+
+# Create a simple event log with timestamps
+file write ./events.log
+    [9/4/2025, 7:47:00 PM] User login: admin
+    [9/4/2025, 7:47:01 PM] Database query executed
+    [9/4/2025, 7:47:02 PM] File uploaded: document.pdf
+
+# Show current time in different formats
+datetime now
+datetime now iso
+datetime now unix
+datetime now local
+
+# Calculate some future dates
+datetime add 1 hour
+datetime add 24 hours
+datetime add 7 days
+
+# Show help for reference
+datetime help

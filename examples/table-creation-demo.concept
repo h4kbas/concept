@@ -1,0 +1,52 @@
+# Database Table Creation Demo
+# This demonstrates the new tabbed block syntax for creating tables with columns
+
+# Create a users table with column definitions
+db create users
+    name is string
+    email is string
+    role is string
+    active is boolean
+    created_at is string
+
+# Create a products table
+db create products
+    name is string
+    price is number
+    category is string
+    in_stock is boolean
+    description is string
+
+# Create an orders table
+db create orders
+    user_id is number
+    product_id is number
+    quantity is number
+    total is number
+    status is string
+    order_date is string
+
+# List all tables
+db tables
+
+# Describe the users table to see the schema
+db describe users
+
+# Insert sample data
+db insert users
+    name is Alice
+    email is alice@example.com
+    role is admin
+    active is true
+    created_at is 2023-10-27
+
+# Insert more data
+db insert users
+    name is Bob
+    email is bob@example.com
+    role is user
+    active is true
+    created_at is 2023-10-27
+
+# Describe users table again to see the data
+db describe users

@@ -1,0 +1,15 @@
+{
+  "name": "datetime-plugin",
+  "version": "1.0.0",
+  "description": "Simple date/time plugin for concept language",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "concept-lang": "file:../../dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

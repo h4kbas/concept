@@ -1,0 +1,70 @@
+# Simple Task Manager App
+# Demonstrates working database operations with tabbed blocks
+
+# Create a tasks table with proper column definitions
+db create tasks
+    id is string
+    title is string
+    description is string
+    status is string
+    priority is string
+    created_at is string
+
+# Create a users table
+db create users
+    id is string
+    username is string
+    email is string
+    role is string
+
+# Insert some sample tasks
+db insert tasks
+    id is task-001
+    title is Setup project
+    description is Initialize the task management system
+    status is completed
+    priority is high
+    created_at is 2024-01-01T10:00:00Z
+
+db insert tasks
+    id is task-002
+    title is Add authentication
+    description is Implement user login system
+    status is in_progress
+    priority is medium
+    created_at is 2024-01-01T10:05:00Z
+
+db insert tasks
+    id is task-003
+    title is Write documentation
+    description is Create API documentation
+    status is pending
+    priority is low
+    created_at is 2024-01-01T10:10:00Z
+
+# Insert some sample users
+db insert users
+    id is user-001
+    username is admin
+    email is admin@taskmanager.com
+    role is admin
+
+db insert users
+    id is user-002
+    username is john_doe
+    email is john@example.com
+    role is user
+
+# Show what we created
+db describe tasks
+db describe users
+
+# Query some data
+db select tasks
+    where status is completed
+
+db select users
+    where role is admin
+
+# Show database statistics
+db stats

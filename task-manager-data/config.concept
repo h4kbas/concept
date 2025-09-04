@@ -1,0 +1,1 @@
+./task-manager-data/config.concept app_name is Task Manager version is 1.0.0 database_path is ./concept-database log_level is info max_tasks_per_user is 100
