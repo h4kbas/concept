@@ -1,10 +1,10 @@
 # Concept Language
 
-A programming language that lets you express ideas, relationships, and data operations using natural, human-readable syntax. Write code that reads like English and think in concepts, not syntax.
+A concept-based language system for semantic data management with inference capabilities. Using natural, human-readable syntax. Write code that reads like English and think in concepts, not syntax.
 
 ## What is Concept Language?
 
-Concept Language is a new programming paradigm that focuses on **what you want to achieve** rather than **how to achieve it**. Instead of writing complex code with brackets, semicolons, and technical jargon, you describe your ideas using natural language patterns.
+Concept Language is a paradigm that focuses on **what you want to achieve** rather than **how to achieve it**. Instead of writing complex code with brackets, semicolons, and technical jargon, you describe your ideas using natural language patterns.
 
 ### Core Philosophy
 
