@@ -1,95 +1,39 @@
 # Concept Language
 
-A revolutionary blockchain-based knowledge representation system that enables semantic data storage, automatic inference, and distributed concept management through natural language syntax.
+A programming language that lets you express ideas, relationships, and data operations using natural, human-readable syntax. Write code that reads like English and think in concepts, not syntax.
 
 ## What is Concept Language?
 
-Concept Language is a **blockchain-based semantic data network** where concepts and their relationships are stored, validated, and automatically inferred across a distributed network. It's designed to represent knowledge in a way that's both human-readable and machine-processable.
+Concept Language is a new programming paradigm that focuses on **what you want to achieve** rather than **how to achieve it**. Instead of writing complex code with brackets, semicolons, and technical jargon, you describe your ideas using natural language patterns.
 
 ### Core Philosophy
 
-- **Concepts are atomic** - The fundamental building blocks of knowledge
+- **Concepts are atomic** - The fundamental building blocks of your program
 - **Relationships define meaning** - How concepts connect and interact
-- **Inference discovers truth** - Automatic derivation of implicit relationships
-- **Blockchain ensures integrity** - Distributed validation and consensus
+- **Natural syntax** - Code that reads like English
+- **Plugin architecture** - Extend functionality with purpose-built modules
 
 ## How It Works
 
-### 1. Concept Definition
+### 1. Simple Relationships
 
 Define concepts and their relationships using natural syntax:
 
 ```concept
-# Basic concepts
-Human
-Duck
-Eye
-Beak
-Intelligent
+# Basic relationships
+app is task_manager
+version is 1.0.0
+description is A simple task management system
 
-# Relationships
-Human +Head
-Human -Beak
-Duck +Beak
-Duck +Eye
-Human isnt Duck
+# Concept definitions
+user is person
+admin is user
+order is transaction
 ```
 
-### 2. Automatic Inference
+### 2. Structured Data with Tabbed Blocks
 
-The system automatically infers new relationships based on logical rules:
-
-```concept
-# Given:
-Duck +Beak
-Human isnt Duck
-
-# System infers:
-Human -Beak
-```
-
-### 3. Blockchain Mining
-
-Miners validate relationships and perform inference across the network:
-
-```concept
-# Block 1: Base concepts
-Human +Head
-Duck +Beak
-
-# Block 2: Additional data
-Human +Eye
-Human isnt Duck
-
-# Mining result: Inferred relationships
-Human +Head +Eye -Beak
-```
-
-## Language Structure
-
-### Terminal Types
-
-#### 1. **Hooked Terminals** (Built-in functionality)
-```concept
-div 10 5
-=> 2
-```
-
-#### 2. **Loose Terminals** (Require external processing)
-```concept
-Human is Duck
-=> Requires validation and consensus
-```
-
-#### 3. **Pure Terminals** (Basic concept identifiers)
-```concept
-Human
-=> Concept identifier
-```
-
-### Tabbed Block Syntax
-
-Create structured data using indentation:
+Create complex data structures using indentation:
 
 ```concept
 # Anonymous concept block
@@ -104,12 +48,17 @@ user_data is
     role is admin
 ```
 
-### Plugin System
+### 3. Plugin System
 
 Extend functionality with plugins that follow the same syntax:
 
 ```concept
 # Database operations
+db create users
+    name is string
+    email is string
+    role is string
+
 db insert users
     name is Alice
     email is alice@example.com
@@ -127,83 +76,194 @@ file write data.txt
     encoding is utf-8
 ```
 
-## Network Architecture
+## Language Features
 
-### Data Types
+### Basic Syntax
 
-#### **Public Data**
-- Freely readable by anyone
-- No cost to access
-- Examples: Basic concept definitions, public knowledge
+#### **Concept Relationships**
+```concept
+# Simple relationships
+Alice is a person
+Alice is 30 years old
+Alice works at Acme Corp
+```
 
-#### **Private Data**
-- Encrypted and access-controlled
-- Only readable by the owner
-- Examples: Personal concept relationships
+#### **Conditional Logic**
+```concept
+# Natural conditional statements
+is user role admin
+    show admin_panel
+    grant full_permissions
 
-#### **Paid Data**
-- Requires payment to access
-- Monetization model for valuable data
-- Examples: Premium concept libraries, specialized knowledge
+is user age greater_than 18
+    allow access
+    show adult_content
+```
 
-### Mining Process
+#### **Tabbed Blocks**
+```concept
+# Structured data
+user_profile is
+    personal_info is
+        name is Alice Johnson
+        age is 30
+        email is alice@example.com
+    work_info is
+        company is Acme Corp
+        position is Senior Developer
+```
 
-1. **Data Collection** - Gather concept relationships from participating nodes
-2. **Conflict Detection** - Identify contradictory relationships
-3. **Consensus Building** - Determine which relationships to keep
-4. **Inference Engine** - Apply logical rules to derive new relationships
-5. **Validation** - Verify that inferred relationships are consistent
+### Plugin System
 
-### Network Economics
+The language comes with built-in plugins for common operations:
 
-- **Reading is free** for public data
-- **Writing requires payment** to prevent spam
-- **Miners earn fees** for processing and validation
-- **Data creators earn** from paid data access
+#### **Database Plugin (`db`)**
+```concept
+# Create tables
+db create users
+    name is string
+    email is string
+    role is string
+    active is boolean
 
-## Key Features
+# Insert data
+db insert users
+    name is Alice
+    email is alice@example.com
+    role is admin
 
-### 🧠 **Automatic Inference**
-- Discovers implicit relationships between concepts
-- Applies logical rules automatically
-- Ensures consistency across the knowledge base
+# Query data
+db select users
+    where role is admin
+    and status is active
 
-### 🔗 **Distributed Consensus**
-- Blockchain-based validation
-- Multiple nodes verify relationships
-- Prevents data corruption and manipulation
+# Update data
+db update users
+    where name is Alice
+    set email is alice.updated@example.com
+```
 
-### 💰 **Economic Model**
-- Free reading of public data
-- Paid access to premium content
-- Incentivized mining and validation
+#### **HTTP Plugin (`http`)**
+```concept
+# Configure server
+http config
+    port is 3000
+    host is localhost
+    cors is true
 
-### 🔌 **Extensible Architecture**
-- Plugin system for custom functionality
-- Database, HTTP, and file operations
-- Easy to add new capabilities
+# Register endpoints
+http endpoint GET /api/users
+    return users
+    filter active
+    sort by name
 
-## Use Cases
+# Start server
+http start
+```
 
-### **Knowledge Management**
-- Corporate knowledge bases
-- Research data organization
-- Educational content structuring
+#### **File Plugin (`file`)**
+```concept
+# Write files
+file write data.txt
+    content is Hello World
+    encoding is utf-8
 
-### **AI and Machine Learning**
-- Training data representation
-- Concept relationship modeling
-- Automated reasoning systems
+# Read files
+file read config.json
+    parse as json
 
-### **Blockchain Applications**
-- Decentralized knowledge networks
-- Semantic data marketplaces
-- Distributed inference systems
+# List directories
+file list ./
+    filter *.txt
+    recursive is true
+```
 
-### **Data Science**
-- Complex relationship modeling
-- Automated data discovery
-- Cross-domain knowledge integration
+#### **DateTime Plugin (`datetime`)**
+```concept
+# Get current time
+datetime now iso
+datetime now unix
+datetime now local
+
+# Format dates
+datetime format 2024-01-01
+    format is YYYY-MM-DD
+    locale is en-US
+
+# Time arithmetic
+datetime add 1 hour
+    to 2024-01-01T10:00:00Z
+
+datetime subtract 30 minutes
+    from 2024-01-01T10:00:00Z
+```
+
+## Real-World Example: Task Manager
+
+Here's a complete task management application:
+
+```concept
+# Database Setup
+db create tasks
+    id is string
+    title is string
+    description is string
+    status is string
+    priority is string
+    created_at is string
+
+db create users
+    id is string
+    username is string
+    email is string
+    role is string
+
+# Add some tasks
+db insert tasks
+    id is task-001
+    title is Design new feature
+    description is Create wireframes and mockups
+    status is in_progress
+    priority is high
+    created_at is 2024-01-04T10:00:00Z
+
+# Set up the API
+http endpoint GET /api/tasks
+    return tasks
+    filter by status
+    sort by priority
+
+http endpoint POST /api/tasks
+    validate title is required
+    validate description is required
+    create new task
+    return task details
+
+# Start the server
+http start
+```
+
+## What Makes It Different?
+
+### 🎨 **Natural Syntax**
+- No brackets, semicolons, or complex punctuation
+- Reads like documentation
+- Self-documenting code
+
+### 🧩 **Conceptual Thinking**
+- Model real-world relationships
+- Think in terms of "what is" rather than "how to"
+- Focus on the problem, not the programming
+
+### 🔧 **Plugin Architecture**
+- Purpose-built modules for common operations
+- Consistent syntax across all plugins
+- Easy to extend with new functionality
+
+### 🌐 **Universal Understanding**
+- Non-programmers can read and understand the code
+- Business logic is clear and obvious
+- Perfect for documentation and communication
 
 ## Getting Started
 
@@ -212,106 +272,78 @@ file write data.txt
 npm install -g concept-lang
 ```
 
-### Basic Example
-Create a file called `knowledge.concept`:
+### Your First Concept File
+Create a file called `hello.concept`:
 ```concept
-# Define basic concepts
-Human
-Duck
-Eye
-Beak
-Intelligent
+# Say hello to the world
+say Hello World
 
-# Establish relationships
-Human +Head
-Human +Eye
-Duck +Beak
-Duck +Eye
-Human isnt Duck
+# Define a person
+person is
+    name is Alice
+    age is 30
+    greeting is Hello, I am Alice
 
-# The system will automatically infer:
-# Human -Beak (since Human isnt Duck and Duck has Beak)
+# Use the person
+say person greeting
 ```
 
 ### Run It
 ```bash
-concept run knowledge.concept
+concept run hello.concept
 ```
 
-## Advanced Examples
-
-### Database Integration
-```concept
-# Create a knowledge base
-db create concepts
-    name is string
-    type is string
-    properties is object
-
-# Store concept data
-db insert concepts
-    name is Human
-    type is entity
-    properties is
-        has_head is true
-        has_beak is false
-        intelligence is high
+### Run with Plugins
+```bash
+concept run hello.concept --plugins ./plugins/db/index.js --plugins ./plugins/http/index.js
 ```
 
-### HTTP API
-```concept
-# Create a knowledge API
-http endpoint GET /api/concepts
-    return concepts
-    filter by type
-    sort by name
+## Use Cases
 
-http endpoint POST /api/inference
-    input concepts
-    run inference rules
-    return new relationships
-```
+### 📊 **Data Modeling**
+- Define complex data structures naturally
+- Model business relationships
+- Create self-documenting schemas
 
-## Technical Architecture
+### 🌐 **Web Development**
+- Build APIs that describe themselves
+- Create readable server logic
+- Focus on business rules, not technical details
 
-### Block Structure
-- **Concepts**: Atomic knowledge units
-- **Pairs**: Relationship identifiers
-- **Chain**: Boolean relationship values
-- **Mining**: Validation and inference process
+### 📝 **Documentation**
+- Write executable documentation
+- Create living specifications
+- Bridge the gap between ideas and code
 
-### Inference Rules
-- **Transitivity**: If A is B and B is C, then A is C
-- **Contradiction Resolution**: Explicit relationships override inferred ones
-- **Consensus**: Multiple sources increase confidence
-- **Validation**: All relationships must be logically consistent
+### 🤖 **Rapid Prototyping**
+- Quickly model ideas and relationships
+- Test concepts before implementation
+- Create working prototypes fast
 
-## Future Roadmap
+## Examples
 
-### **Smart Contracts**
-- Automated execution of concept-based logic
-- Conditional relationship activation
-- Complex inference rule implementation
+Check out the `examples/` directory for:
+- `working-demo.concept` - Basic capabilities demonstration
+- `task-manager-fixed.concept` - Complete application example
+- `plugins/*/examples/` - Plugin-specific examples
 
-### **Cross-Chain Integration**
-- Interoperability with other blockchain networks
-- Concept mapping between different systems
-- Universal knowledge representation
+## Philosophy
 
-### **AI Integration**
-- Machine learning for concept discovery
-- Automated relationship suggestion
-- Natural language processing for concept input
+Concept Language is built on the belief that **programming should be about expressing ideas, not fighting syntax**.
+
+- **Clarity over cleverness**
+- **Readability over performance** (initially)
+- **Understanding over memorization**
+- **Ideas over implementation details**
 
 ## Contributing
 
-We're building the future of knowledge representation! Help us shape this revolutionary system:
+We're building something new and exciting! Help us shape the future of programming:
 
-1. **Try the language** and share feedback
-2. **Create examples** and use cases
-3. **Build plugins** and extensions
-4. **Improve inference rules** and validation
-5. **Contribute to the blockchain** implementation
+1. Try the language and share feedback
+2. Create examples and tutorials
+3. Build plugins and extensions
+4. Help us improve the syntax and features
 
 ## License
 
@@ -319,4 +351,4 @@ MIT License - see LICENSE file for details
 
 ---
 
-**Ready to revolutionize knowledge representation?** Start with the examples and see how concepts can change the way we think about data and relationships.
+**Ready to think in concepts?** Start with the examples and see how natural programming can be.
