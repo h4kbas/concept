@@ -1,0 +1,147 @@
+# Database Plugin - Concept Language Syntax Demo
+# This demonstrates the new tabbed block syntax for database operations
+
+# Configuration using tabbed blocks
+db config
+    path is ./concept-database
+    autocommit is true
+    indexing is true
+
+# Create tables with column definitions
+db create users
+    name is string
+    email is string
+    role is string
+    active is boolean
+
+db create products
+    name is string
+    price is number
+    category is string
+    in_stock is boolean
+
+db create orders
+    user_id is number
+    product_id is number
+    quantity is number
+    total is number
+    status is string
+
+# List all tables
+db tables
+
+# Insert sample data using tabbed block syntax
+db insert users
+    name is Alice
+    email is alice@example.com
+    role is admin
+
+db insert users
+    name is Bob
+    email is bob@example.com
+    role is user
+
+db insert users
+    name is Carol
+    email is carol@example.com
+    role is user
+
+db insert products
+    name is Laptop
+    price is 999.99
+    category is Electronics
+
+db insert products
+    name is Mouse
+    price is 29.99
+    category is Electronics
+
+db insert products
+    name is Desk
+    price is 199.99
+    category is Furniture
+
+db insert orders
+    user_id is 1
+    product_id is 1
+    quantity is 1
+    total is 999.99
+
+db insert orders
+    user_id is 2
+    product_id is 2
+    quantity is 2
+    total is 59.98
+
+# Query data using different methods
+db select users
+db select products
+db select orders
+
+# Find specific data
+db find users admin
+db find products Electronics
+
+# Count records
+db count users
+db count products
+db count orders
+
+# Count with conditions using tabbed block syntax
+db count users
+    where role is admin
+
+db count products
+    where category is Electronics
+
+# Update data using tabbed block syntax
+db update users
+    where name is Alice
+    set email is alice.updated@example.com
+
+db update products
+    where name is Laptop
+    set price is 899.99
+
+# Delete data using tabbed block syntax
+db delete users
+    where name is Carol
+
+# SQL queries (no quotes needed)
+db query SELECT * FROM users
+db query SELECT * FROM products WHERE category = 'Electronics'
+db query INSERT INTO users VALUES ('David', 'david@example.com', 'user')
+
+# Show table info
+db describe users
+db describe products
+
+# Index management
+db index create users email
+db index create products category
+db index list
+
+# Transaction management
+db begin
+db insert users
+    name is Eve
+    email is eve@example.com
+    role is user
+db commit
+
+# Backup and restore
+db backup before-changes
+db insert users
+    name is Frank
+    email is frank@example.com
+    role is user
+db list-backups
+db restore before-changes
+
+# Export and import
+db export users json
+db import users ./users-backup.json
+
+# Database maintenance
+db vacuum
+db stats

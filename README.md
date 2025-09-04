@@ -1,287 +1,195 @@
 # Concept Language
 
-A concept-based language system for semantic data management with inference capabilities. This system allows you to define relationships between concepts and automatically infer missing relationships based on logical rules.
+A powerful, expressive language for defining concepts, relationships, and data operations using natural syntax.
 
-## Features
+## Core Features
 
-- **Concept Management**: Define and manage concepts and their relationships
-- **Automatic Inference**: Automatically infer missing relationships based on logical rules
-- **Hook System**: Extensible hook system for custom functionality
-- **CLI Interface**: Command-line interface for compilation and analysis
-- **TypeScript Support**: Full TypeScript support with type safety
-- **Comprehensive Testing**: Extensive test suite with high coverage
+### Tabbed Block Syntax
+
+The language uses indented blocks to define structured data and operations:
+
+```concept
+# Anonymous concept block
+    name is Alice
+    age is 30
+    role is admin
+
+# Named concept block
+user_data is
+    name is Alice
+    age is 30
+    role is admin
+```
+
+### Plugin System
+
+Extend functionality with plugins that follow the same syntax:
+
+```concept
+# Database operations
+db insert users
+    name is Alice
+    email is alice@example.com
+    role is admin
+
+# HTTP operations
+http endpoint GET /api/users
+    return users
+    filter active
+    sort by name
+
+# File operations
+file write data.txt
+    content is Hello World
+    encoding is utf-8
+```
+
+## Available Plugins
+
+### Database Plugin (`db`)
+
+Complete database operations with concept syntax:
+
+```concept
+# Create tables with column definitions
+db create users
+    name is string
+    email is string
+    role is string
+    active is boolean
+
+db create products
+    name is string
+    price is number
+    category is string
+    in_stock is boolean
+
+# Insert data
+db insert users
+    name is Alice
+    email is alice@example.com
+    role is admin
+
+# Query data
+db select users
+    where role is admin
+
+# Update data
+db update users
+    where name is Alice
+    set email is alice.updated@example.com
+
+# Delete data
+db delete users
+    where role is guest
+```
+
+### HTTP Plugin (`http`)
+
+Build web APIs with natural syntax:
+
+```concept
+# Configure server
+http config
+    port is 3000
+    host is localhost
+    cors is true
+
+# Register endpoints
+http endpoint GET /api/users
+    return users
+    filter active
+    sort by name
+
+# Start server
+http start
+```
+
+### File Plugin (`file`)
+
+File system operations:
+
+```concept
+# Write files
+file write data.txt
+    content is Hello World
+    encoding is utf-8
+
+# Read files
+file read config.json
+    parse as json
+
+# List directories
+file list ./
+    filter *.txt
+    recursive is true
+```
+
+### Data Plugin (`data`)
+
+Data management and snapshots:
+
+```concept
+# Show statistics
+data stats
+
+# Create snapshots
+data snapshot save
+    name is before_changes
+    description is Initial state
+
+# Load snapshots
+data snapshot load
+    name is before_changes
+```
 
 ## Installation
 
 ```bash
-npm install
-```
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Build the project
-npm run build
-
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run tests in watch mode
-npm run test:watch
-
-# Lint code
-npm run lint
-
-# Format code
-npm run format
-
-# Clean build artifacts
-npm run clean
+npm install concept-lang
 ```
 
 ## Usage
 
-### CLI Usage
-
 ```bash
-# Compile a concept file
-npx concept compile input.concept -o output.concept
-
 # Run a concept file
-npx concept run input.concept
+concept run example.concept
 
-# Analyze a concept file
-npx concept analyze input.concept
+# Run with plugins
+concept run example.concept --plugins ./plugins/
 
-# Legacy usage (backward compatibility)
-npx concept input.concept output.concept
-```
-
-### Programmatic Usage
-
-```typescript
-import { Compiler, Block, Concept } from 'concept-lang';
-
-// Create a compiler
-const compiler = new Compiler();
-
-// Compile a concept source
-const source = `
-  A is B
-  B is C
-  C is D
-`;
-
-const result = compiler.compile(source);
-console.log(result);
-// Output:
-// A is B
-// B is C
-// C is D
-// A is C
-// A is D
-// B is D
-
-// Or get the block state for more detailed analysis
-const block = compiler.compileToState(source);
-console.log(block.concepts); // All concepts
-console.log(block.chain); // All relationships
-console.log(block.blockExplorer.getStats()); // Statistics
-```
-
-## Language Syntax
-
-### Basic Relationships
-
-```
-# Positive relationship
-A is B
-
-# Negative relationship
-A isnt B
-```
-
-### Conditional Execution
-
-```
-# If A is B, execute the following
-is A B say yes
-isnt A B say no
-
-# If A is B, execute C is D
-is A B C is D
-```
-
-### Output
-
-```
-# Print to console
-say hello world
+# Watch mode
+concept run example.concept --watch
 ```
 
 ## Examples
 
-### Basic Example
+See the `examples/` directory for comprehensive examples:
 
-```concept
-Elma is red
-Elma is food
-Elma isnt blue
-Elma isnt great
+- `comprehensive.concept` - All plugins working together
+- `plugins/db/examples/db.concept` - Database operations
+- `plugins/http/examples/http.concept` - HTTP API setup
+- `plugins/file/examples/file.concept` - File operations
+- `plugins/data/examples/data.concept` - Data management
 
-Mela is Elma
+## Language Design
 
-# These will output based on the relationships above
-is Elma great say yes elma great
-is Mela great say yes mela great
-isnt Elma great say no elma great
-isnt Mela great say no mela great
+The concept language is designed to be:
 
-is Mela red say yes mela red
-isnt Mela red say no mela red
-```
-
-### Complex Inference
-
-```concept
-A is B
-B is C
-C is D
-D is E
-
-# The system will automatically infer:
-# A is C, A is D, A is E
-# B is D, B is E
-# C is E
-```
-
-## API Reference
-
-### Block
-
-The core data structure that manages concepts, relationships, and inference.
-
-```typescript
-class Block {
-  // Properties
-  concepts: readonly Concept[];
-  pairs: readonly Pair[];
-  chain: readonly Data[];
-  blockExplorer: BlockExplorer;
-
-  // Methods
-  addConcept(concept: Concept): Concept;
-  hasConcept(concept: Concept): boolean;
-  getConcept(name: string): Concept | undefined;
-  addPair(conceptA: Concept, conceptB: Concept): Pair;
-  isPairAvailable(conceptA: Concept, conceptB: Concept): boolean;
-  addToChain(conceptA: Concept, conceptB: Concept, relation: boolean): void;
-  inferMissingPairs(): void;
-  tokenize(raw: string): Concept[][];
-  parse(tokens: Concept[][]): void;
-  serialize(): string;
-  getState(): BlockState;
-}
-```
-
-### BlockExplorer
-
-Provides query and analysis capabilities for a Block.
-
-```typescript
-class BlockExplorer {
-  // Query methods
-  getConcept(concept: Concept): Concept | undefined;
-  getConceptByName(name: string): Concept | undefined;
-  getPair(pair: Pair): Pair | undefined;
-  getData(data: Data): Data | undefined;
-  getConcepts(): readonly Concept[];
-  getPairs(): readonly Pair[];
-  getChain(): readonly Data[];
-
-  // Analysis methods
-  calculateCurrentPairState(pair: Pair): boolean | null;
-  calculateBlockState(): BlockState;
-  getRelatedConcepts(concept: Concept): readonly Concept[];
-  areConceptsRelated(conceptA: Concept, conceptB: Concept): boolean;
-  getRelationshipValue(conceptA: Concept, conceptB: Concept): boolean | null;
-  findConceptsWithValue(concept: Concept, value: boolean): readonly Concept[];
-  getStats(): BlockStats;
-}
-```
-
-### Compiler
-
-Compiles Concept language source code.
-
-```typescript
-class Compiler {
-  constructor(hookMap?: HookMap);
-
-  // Properties
-  block: Block;
-
-  // Methods
-  compile(source: string): string;
-  compileToState(source: string): Block;
-  reset(): void;
-}
-```
-
-## Type Definitions
-
-```typescript
-interface Concept {
-  readonly name: string;
-}
-
-interface Pair {
-  readonly conceptA: Concept;
-  readonly conceptB: Concept;
-}
-
-interface Data {
-  readonly pair: Pair;
-  readonly value: boolean;
-}
-
-interface HookMap {
-  readonly [fn: string]: (params: Concept[]) => Concept[] | void;
-}
-
-interface BlockState {
-  readonly [conceptA: string]: {
-    readonly [conceptB: string]: boolean;
-  };
-}
-```
+- **Natural**: Reads like English
+- **Consistent**: Same syntax patterns throughout
+- **Extensible**: Easy to add new plugins
+- **Composable**: Blocks can be nested and combined
+- **Type Safe**: Clear data structure definitions
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests for your changes
-5. Run the test suite
-6. Submit a pull request
+4. Add tests
+5. Submit a pull request
 
 ## License
 
-MIT License - see LICENSE file for details.
-
-## Changelog
-
-### 1.0.0
-
-- Initial release
-- Core Block and BlockExplorer functionality
-- Compiler with built-in hooks
-- CLI interface
-- Comprehensive test suite
-- TypeScript support
+MIT License - see LICENSE file for details

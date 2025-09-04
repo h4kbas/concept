@@ -1,0 +1,69 @@
+# Data Plugin - Concept Language Syntax Demo
+# This demonstrates the new tabbed block syntax for data management
+
+# Define concepts using tabbed block syntax
+user is
+    name is string
+    email is string
+    role is string
+    active is boolean
+
+order is
+    user_id is number
+    product_id is number
+    quantity is number
+    total is number
+    status is string
+
+product is
+    name is string
+    price is number
+    category is string
+    available is boolean
+
+# Define relationships
+user has order
+order contains product
+product costs money
+
+# Data operations using tabbed block syntax
+data stats
+
+data list concepts
+data list relationships
+
+# Snapshot operations using tabbed block syntax
+data snapshot save
+    name is initial_state
+    description is Initial data state
+
+data snapshot list
+
+data snapshot save
+    name is before_changes
+    description is Before making changes
+
+data clear
+
+data snapshot load
+    name is initial_state
+
+data stats
+
+# Advanced data operations
+data export
+    format is json
+    file is data_export.json
+
+data import
+    file is data_import.json
+    format is json
+
+data validate
+    schema is user_schema
+    data is user_data
+
+data transform
+    input is raw_data
+    output is processed_data
+    rules is transformation_rules

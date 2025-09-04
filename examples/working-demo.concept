@@ -1,0 +1,42 @@
+# Working Demo - Shows Current Capabilities
+# This demonstrates what's currently working in the concept language system
+
+# Basic concept relationships
+app is task_manager
+version is 1.0.0
+description is A simple task management system
+
+# Database operations with tabbed blocks
+db create projects
+    name is string
+    description is string
+    status is string
+    created_at is string
+
+# Insert data using tabbed blocks
+db insert projects
+    name is Concept Language
+    description is A new programming paradigm
+    status is active
+    created_at is 2024-01-01T10:00:00Z
+
+db insert projects
+    name is Plugin System
+    description is Extensible plugin architecture
+    status is completed
+    created_at is 2024-01-01T11:00:00Z
+
+# Show what we created
+db describe projects
+
+# Query data
+db select projects
+    where status is active
+
+# Show database statistics
+db stats
+
+# Basic concept inference
+say Building a concept-based programming language
+say Using tabbed blocks for structured data
+say Database operations working with type safety

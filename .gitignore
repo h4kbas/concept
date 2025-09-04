@@ -47,4 +47,41 @@ pids/
 .eslintcache
 
 # Output files
-*.concept
+# Ignore generated concept files but keep organized test examples
+output.concept
+plugin-test.concept
+test-*.concept
+*-test.concept
+test-*.concept
+output/*.concept
+
+# Demo and example outputs
+concept-data/
+concept-database/
+analysis-output/
+custom-plugin-output/
+logs/
+output/
+
+# Plugin build outputs
+plugins/*/dist/
+plugins/*/node_modules/
+plugins/*/*.js.map
+plugins/**/*.js
+plugins/*/tsconfig.json
+plugins/*/index.js
+plugins/*/package-lock.json
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Test outputs
+test-output/
+test-data/
+test-results/
+
+# Generated documentation
+docs/generated/

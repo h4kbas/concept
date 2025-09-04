@@ -1,0 +1,14 @@
+{
+  "name": "database-plugin",
+  "version": "1.0.0",
+  "description": "A plugin that provides database-like operations for concept data",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "concept-lang": "file:../../.."
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  }
+}

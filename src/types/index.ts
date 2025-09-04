@@ -17,7 +17,10 @@ export interface Data {
 }
 
 export interface HookMap {
-  readonly [fn: string]: (params: Concept[]) => Concept[] | void;
+  readonly [fn: string]: (
+    params: Concept[],
+    block?: Concept[]
+  ) => Concept[] | void;
 }
 
 export interface BlockConfig {
