@@ -1,69 +1,164 @@
-How to keep data 2: Block and Mining Inference
+# Blockchain Data Model: Block and Mining Inference
 
-true false
-t f
+## Data Representation
 
-BLOCK 1
-1: a 1:b 1:c 1:d 1:e
+- **true/false** → **t/f**
+- **Concepts** are identified by block ID and concept ID (e.g., `1:a` = Block 1, Concept A)
+
+## Block 1
+
+### Concepts
+
+```
+1:a 1:b 1:c 1:d 1:e
 Block Concepts: [Human, Duck, Eye, Beak, Intelligent]
+```
 
-    		1: 0                   1:1           1: 2                1:3            1:4                1:5
+### Pairs and Relationships
 
-Block Pairs: [ [1:a, 1:c], [1:a, 1:b], [1:b, 1:c], [1:b, 1:d] , [1:a, 1:e], [1:b, 1:e] ]
+```
+1:0  1:1  1:2  1:3  1:4  1:5
+```
 
-Chain:[
-[1:0, t],
-[1:1, f]
-[1:2, t],
-[1:3, t],
-[1:4, f],
+**Block Pairs:**
+
+```javascript
+[
+  [1:a, 1:c],  // Human-Eye
+  [1:a, 1:b],  // Human-Duck
+  [1:b, 1:c],  // Duck-Eye
+  [1:b, 1:d],  // Duck-Beak
+  [1:a, 1:e],  // Human-Intelligent
+  [1:b, 1:e]   // Duck-Intelligent
 ]
+```
 
-Miner Node: Block 1
-1: a 1:b 1:c 1:d 1:e
-Block Concepts: [Human, Duck, Eye, Beak, Intelligent]
+**Chain (Relationships):**
 
-1: 0 1:1 1: 2 1:3 1:4 1:5 1:6 1:7
-Block Pairs: [ [1:a, 1:c], [1:a, 1:b], [1:b, 1:c], [1:b, 1:d] , [1:a, 1:e], [1:b, 1:e] , [1:a, 1:c] X, [1:a, 1:d] ✓ ]
-
-Chain:[
-[1:0, t],
-[1:1, f]
-[1:2, t],
-[1:3, t],
-[1:4, f],
-[1:6, f] // REMOVED because explicit definition of [1:a, 1:c] done before as [1:0, t] X
-[1:7, f] // STAYS because not explicit definition of [1:a, 1:d] done before as [x:x, t/f] ✓
+```javascript
+[
+  [1:0, t],  // Human has Eye
+  [1:1, f],  // Human is not Duck
+  [1:2, t],  // Duck has Eye
+  [1:3, t],  // Duck has Beak
+  [1:4, f]   // Human is not Intelligent
 ]
+```
 
-BLOCK 2
+## Mining Process
+
+### Miner Node: Block 1
+
+**Concepts:** `1:a 1:b 1:c 1:d 1:e`
+**Block Concepts:** `[Human, Duck, Eye, Beak, Intelligent]`
+
+**Pairs:** `1:0 1:1 1:2 1:3 1:4 1:5 1:6 1:7`
+
+**Block Pairs:**
+
+```javascript
+[
+  [1:a, 1:c],  // Human-Eye
+  [1:a, 1:b],  // Human-Duck
+  [1:b, 1:c],  // Duck-Eye
+  [1:b, 1:d],  // Duck-Beak
+  [1:a, 1:e],  // Human-Intelligent
+  [1:b, 1:e],  // Duck-Intelligent
+  [1:a, 1:c],  // ❌ DUPLICATE - REMOVED
+  [1:a, 1:d]   // ✅ NEW - Human-Beak
+]
+```
+
+**Chain:**
+
+```javascript
+[
+  [1:0, t],   // Human has Eye
+  [1:1, f],   // Human is not Duck
+  [1:2, t],   // Duck has Eye
+  [1:3, t],   // Duck has Beak
+  [1:4, f],   // Human is not Intelligent
+  [1:6, f],   // ❌ REMOVED - explicit definition exists
+  [1:7, f]    // ✅ STAYS - Human is not Beak (inferred)
+]
+```
+
+## Block 2
+
+### Concepts
+
+```
 2:a
 Block Concepts: [Car]
+```
+
+### Pairs
+
+```
 2:0
-Block Pairs: [ [2:a, 1:c] ]
+Block Pairs: [[2:a, 1:c]]  // Car-Eye
+```
 
-Chain:[
-[2:0, f],
-[1:4, t],
-[1:5, f],
+**Chain:**
+
+```javascript
+[
+  [2:0, f],  // Car does not have Eye
+  [1:4, t],  // Human is Intelligent (updated)
+  [1:5, f]   // Duck is not Intelligent
 ]
+```
 
-CURRENT STATE: SUMMARY of BLOCK 1 and BLOCK 2 (ARCHIVE NODE)
+## Current State: Archive Node
 
-1: a 1:b 1:c 1:d 1:e 2:a
+### Combined Concepts
+
+```
+1:a 1:b 1:c 1:d 1:e 2:a
 Block Concepts: [Human, Duck, Eye, Beak, Intelligent, Car]
+```
 
-1: 0 1:1 1: 2 1:3 1:4 1:5 1:7 2:0
-Block Pairs: [ [1:a, 1:c], [1:a, 1:b], [1:b, 1:c], [1:b, 1:d] , [1:a, 1:e], [1:b, 1:e] , [1:a, 1:d], [2:a, 1:c]]
+### Combined Pairs
 
-Chain:[
-[1:0, t],
-[1:1, f]
-[1:2, t],
-[1:3, t],
-[1:4, f],
-[1:7, f],
-[2:0, f],
-[1:4, t],
-[1:5, f],
+```
+1:0 1:1 1:2 1:3 1:4 1:5 1:7 2:0
+```
+
+**Block Pairs:**
+
+```javascript
+[
+  [1:a, 1:c],  // Human-Eye
+  [1:a, 1:b],  // Human-Duck
+  [1:b, 1:c],  // Duck-Eye
+  [1:b, 1:d],  // Duck-Beak
+  [1:a, 1:e],  // Human-Intelligent
+  [1:b, 1:e],  // Duck-Intelligent
+  [1:a, 1:d],  // Human-Beak (inferred)
+  [2:a, 1:c]   // Car-Eye
 ]
+```
+
+**Final Chain:**
+
+```javascript
+[
+  [1:0, t],   // Human has Eye
+  [1:1, f],   // Human is not Duck
+  [1:2, t],   // Duck has Eye
+  [1:3, t],   // Duck has Beak
+  [1:4, f],   // Human is not Intelligent
+  [1:7, f],   // Human is not Beak (inferred)
+  [2:0, f],   // Car does not have Eye
+  [1:4, t],   // Human is Intelligent (updated)
+  [1:5, f]    // Duck is not Intelligent
+]
+```
+
+## Key Concepts
+
+1. **Block Structure**: Each block contains concepts, pairs, and a chain of relationships
+2. **Mining Process**: Miners validate and infer new relationships
+3. **Duplicate Prevention**: Explicit definitions take precedence over inferred ones
+4. **Cross-Block References**: Blocks can reference concepts from other blocks
+5. **Archive Node**: Maintains the complete state across all blocks

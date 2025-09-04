@@ -1,17 +1,59 @@
 {
-  "dependencies": {
-    "@types/node": "^20.3.1"
-  },
-  "name": "concept",
+  "name": "concept-lang",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "ts-node compiler.ts ./examples/input ./examples/output"
+  "description": "A concept-based language system for semantic data management with inference capabilities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "concept": "dist/cli.js"
   },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "prepublishOnly": "npm run build",
+    "example": "npm run build && node dist/cli.js examples/elma_mela.concept examples/output.concept"
+  },
+  "keywords": [
+    "concept",
+    "language",
+    "semantic",
+    "inference",
+    "blockchain"
+  ],
   "author": "",
-  "license": "ISC",
-  "description": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0"
+  },
   "devDependencies": {
-    "ts-node": "^10.9.1"
-  }
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.1.0",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ]
 }
