@@ -1,7 +1,7 @@
 {
   "name": "concept-lang",
   "version": "1.0.0",
-  "description": "A concept-based language system for semantic data management with inference capabilities",
+  "description": "A semantic network system for defining concepts, relationships, and building knowledge graphs with automatic inference",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -23,12 +23,16 @@
   },
   "keywords": [
     "concept",
-    "language",
-    "semantic",
+    "semantic-network",
+    "knowledge-graph",
     "inference",
-    "blockchain"
+    "relationships",
+    "schema",
+    "data-modeling",
+    "ai",
+    "machine-learning"
   ],
-  "author": "",
+  "author": "Huseyin Akbas",
   "license": "MIT",
   "dependencies": {
     "commander": "^11.1.0",
