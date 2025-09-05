@@ -1,354 +1,422 @@
 # Concept Language
 
-A concept-based language system for semantic data management with inference capabilities. Using natural, human-readable syntax. Write code that reads like English and think in concepts, not syntax.
+A semantic network system for defining concepts, their relationships, and building knowledge graphs that can be used across various domains. Discover implicit relationships through automatic inference and interact with external resources through a powerful plugin system.
 
 ## What is Concept Language?
 
-Concept Language is a paradigm that focuses on **what you want to achieve** rather than **how to achieve it**. Instead of writing complex code with brackets, semicolons, and technical jargon, you describe your ideas using natural language patterns.
+Concept Language is a **semantic network system** designed to model knowledge through concepts and their relationships. It enables you to define structured data, discover implicit connections, and build semantic networks that can be used across various areas including AI, data science, knowledge management, and more.
 
 ### Core Philosophy
 
-- **Concepts are atomic** - The fundamental building blocks of your program
+- **Concepts are atomic** - The fundamental building blocks of knowledge
 - **Relationships define meaning** - How concepts connect and interact
-- **Natural syntax** - Code that reads like English
-- **Plugin architecture** - Extend functionality with purpose-built modules
+- **Schema and data together** - Define structure alongside actual data
+- **Automatic inference** - Discover relationships you haven't explicitly defined
+- **Plugin hooks** - Tap into concepts to make them useful and interactive
 
 ## How It Works
 
-### 1. Simple Relationships
+### 1. Define Concepts and Relationships
 
-Define concepts and their relationships using natural syntax:
+Create semantic networks using natural syntax:
 
 ```concept
-# Basic relationships
-app is task_manager
-version is 1.0.0
-description is A simple task management system
+# Basic concept definitions
+Human is entity
+Duck is entity
+Eye is feature
+Beak is feature
+Intelligent is property
 
-# Concept definitions
-user is person
-admin is user
-order is transaction
+# Explicit relationships
+Human has Eye
+Duck has Beak
+Human isnt Duck
+Duck has Eye
 ```
 
-### 2. Structured Data with Tabbed Blocks
+### 2. Automatic Inference
 
-Create complex data structures using indentation:
+The system automatically discovers implicit relationships:
 
 ```concept
-# Anonymous concept block
-    name is Alice
-    age is 30
-    role is admin
+# Given these explicit relationships:
+Duck has Beak
+Human isnt Duck
 
-# Named concept block
-user_data is
-    name is Alice
-    age is 30
-    role is admin
+# The system infers:
+Human hasnt Beak
 ```
 
-### 3. Plugin System
+### 3. Schema with Data
 
-Extend functionality with plugins that follow the same syntax:
+Define structure and data together:
 
 ```concept
-# Database operations
-db create users
+# Schema definition
+user_schema is
     name is string
     email is string
     role is string
+    age is number
 
-db insert users
+# Data using the schema
+alice is user_schema
+    name is Alice
+    email is alice@example.com
+    role is admin
+    age is 30
+```
+
+### 4. Plugin Hooks
+
+Plugins can hook into concepts to make them useful:
+
+```concept
+# Database plugin hooks into data concepts
+db store users
     name is Alice
     email is alice@example.com
     role is admin
 
-# HTTP API endpoints
-http endpoint GET /api/users
+# HTTP plugin hooks into API concepts
+http expose users
+    endpoint is /api/users
+    method is GET
     return users
-    filter active
-    sort by name
 
-# File operations
-file write data.txt
-    content is Hello World
-    encoding is utf-8
+# File plugin hooks into document concepts
+file save report
+    content is user_analysis
+    format is json
+    path is ./reports/
 ```
 
-## Language Features
+## Core Features
 
-### Basic Syntax
+### Semantic Network Building
 
-#### **Concept Relationships**
+#### **Concept Definition**
+
 ```concept
-# Simple relationships
-Alice is a person
-Alice is 30 years old
-Alice works at Acme Corp
+# Define atomic concepts
+Person is entity
+Company is organization
+Project is work_item
+Skill is capability
 ```
 
-#### **Conditional Logic**
-```concept
-# Natural conditional statements
-is user role admin
-    show admin_panel
-    grant full_permissions
+#### **Relationship Modeling**
 
-is user age greater_than 18
-    allow access
-    show adult_content
+```concept
+# Define relationships between concepts
+Alice is Person
+Alice works_at Acme_Corp
+Acme_Corp is Company
+Alice has_skill Programming
+Programming is Skill
 ```
 
-#### **Tabbed Blocks**
+#### **Hierarchical Relationships**
+
 ```concept
-# Structured data
+# Build concept hierarchies
+Developer is Person
+Senior_Developer is Developer
+Alice is Senior_Developer
+
+# The system infers:
+Alice is Person
+Alice is Developer
+```
+
+### Automatic Inference
+
+The system discovers implicit relationships:
+
+```concept
+# Given:
+Duck has Beak
+Human isnt Duck
+Bird has Beak
+Duck is Bird
+
+# System infers:
+Human isnt Bird
+Human hasnt Beak
+```
+
+### Schema and Data Integration
+
+#### **Define Structure with Data**
+
+```concept
+# Schema definition
+product_schema is
+    name is string
+    price is number
+    category is string
+    in_stock is boolean
+
+# Data instances
+laptop is product_schema
+    name is MacBook Pro
+    price is 2000
+    category is electronics
+    in_stock is true
+```
+
+#### **Nested Structures**
+
+```concept
+# Complex nested schemas
 user_profile is
     personal_info is
-        name is Alice Johnson
-        age is 30
-        email is alice@example.com
+        name is string
+        age is number
+        email is string
     work_info is
-        company is Acme Corp
-        position is Senior Developer
+        company is string
+        position is string
+        department is string
+    preferences is
+        theme is string
+        notifications is boolean
 ```
 
 ### Plugin System
 
-The language comes with built-in plugins for common operations:
+Plugins hook into concepts to provide functionality:
 
-#### **Database Plugin (`db`)**
+#### **Database Plugin**
+
 ```concept
-# Create tables
+# Hook data concepts to database storage
 db create users
     name is string
     email is string
     role is string
-    active is boolean
 
-# Insert data
 db insert users
     name is Alice
     email is alice@example.com
     role is admin
 
-# Query data
+# Query based on relationships
 db select users
     where role is admin
-    and status is active
-
-# Update data
-db update users
-    where name is Alice
-    set email is alice.updated@example.com
+    and name contains Alice
 ```
 
-#### **HTTP Plugin (`http`)**
-```concept
-# Configure server
-http config
-    port is 3000
-    host is localhost
-    cors is true
+#### **HTTP Plugin**
 
-# Register endpoints
+```concept
+# Hook concepts to web APIs
 http endpoint GET /api/users
     return users
     filter active
     sort by name
 
-# Start server
-http start
+http endpoint POST /api/concepts
+    input concept_data
+    validate schema
+    store in database
 ```
 
-#### **File Plugin (`file`)**
-```concept
-# Write files
-file write data.txt
-    content is Hello World
-    encoding is utf-8
-
-# Read files
-file read config.json
-    parse as json
-
-# List directories
-file list ./
-    filter *.txt
-    recursive is true
-```
-
-#### **DateTime Plugin (`datetime`)**
-```concept
-# Get current time
-datetime now iso
-datetime now unix
-datetime now local
-
-# Format dates
-datetime format 2024-01-01
-    format is YYYY-MM-DD
-    locale is en-US
-
-# Time arithmetic
-datetime add 1 hour
-    to 2024-01-01T10:00:00Z
-
-datetime subtract 30 minutes
-    from 2024-01-01T10:00:00Z
-```
-
-## Real-World Example: Task Manager
-
-Here's a complete task management application:
+#### **File Plugin**
 
 ```concept
-# Database Setup
-db create tasks
-    id is string
-    title is string
-    description is string
-    status is string
-    priority is string
-    created_at is string
+# Hook concepts to file system
+file write knowledge_base.json
+    content is concept_network
+    format is json
+    pretty_print is true
 
-db create users
-    id is string
-    username is string
-    email is string
-    role is string
-
-# Add some tasks
-db insert tasks
-    id is task-001
-    title is Design new feature
-    description is Create wireframes and mockups
-    status is in_progress
-    priority is high
-    created_at is 2024-01-04T10:00:00Z
-
-# Set up the API
-http endpoint GET /api/tasks
-    return tasks
-    filter by status
-    sort by priority
-
-http endpoint POST /api/tasks
-    validate title is required
-    validate description is required
-    create new task
-    return task details
-
-# Start the server
-http start
+file read schema.concept
+    parse as concepts
+    load into memory
 ```
 
-## What Makes It Different?
+#### **DateTime Plugin**
 
-### 🎨 **Natural Syntax**
-- No brackets, semicolons, or complex punctuation
-- Reads like documentation
-- Self-documenting code
-
-### 🧩 **Conceptual Thinking**
-- Model real-world relationships
-- Think in terms of "what is" rather than "how to"
-- Focus on the problem, not the programming
-
-### 🔧 **Plugin Architecture**
-- Purpose-built modules for common operations
-- Consistent syntax across all plugins
-- Easy to extend with new functionality
-
-### 🌐 **Universal Understanding**
-- Non-programmers can read and understand the code
-- Business logic is clear and obvious
-- Perfect for documentation and communication
-
-## Getting Started
-
-### Installation
-```bash
-npm install -g concept-lang
-```
-
-### Your First Concept File
-Create a file called `hello.concept`:
 ```concept
-# Say hello to the world
-say Hello World
-
-# Define a person
-person is
-    name is Alice
-    age is 30
-    greeting is Hello, I am Alice
-
-# Use the person
-say person greeting
-```
-
-### Run It
-```bash
-concept run hello.concept
-```
-
-### Run with Plugins
-```bash
-concept run hello.concept --plugins ./plugins/db/index.js --plugins ./plugins/http/index.js
+# Hook time concepts to date operations
+created_at is datetime now
+updated_at is datetime add 1 hour to created_at
+expires_at is datetime add 30 days to created_at
 ```
 
 ## Use Cases
 
-### 📊 **Data Modeling**
-- Define complex data structures naturally
-- Model business relationships
-- Create self-documenting schemas
+### **Knowledge Management**
 
-### 🌐 **Web Development**
-- Build APIs that describe themselves
-- Create readable server logic
-- Focus on business rules, not technical details
+- Corporate knowledge bases
+- Research data organization
+- Educational content structuring
+- Expert system development
 
-### 📝 **Documentation**
-- Write executable documentation
-- Create living specifications
-- Bridge the gap between ideas and code
+### **AI and Machine Learning**
 
-### 🤖 **Rapid Prototyping**
-- Quickly model ideas and relationships
-- Test concepts before implementation
-- Create working prototypes fast
+- Training data representation
+- Concept relationship modeling
+- Automated reasoning systems
+- Knowledge graph construction
+
+### **Data Science**
+
+- Complex relationship modeling
+- Automated data discovery
+- Cross-domain knowledge integration
+- Semantic data analysis
+
+### **Software Development**
+
+- API documentation as code
+- Configuration management
+- Data modeling and validation
+- System architecture documentation
+
+### **Research and Academia**
+
+- Scientific concept modeling
+- Hypothesis generation
+- Literature review automation
+- Knowledge synthesis
+
+## Real-World Example: Knowledge Base
+
+Here's a complete knowledge base system:
+
+```concept
+# Define the domain concepts
+Person is entity
+Company is organization
+Skill is capability
+Project is work_item
+Technology is tool
+
+# Define relationships
+Alice is Person
+Bob is Person
+Acme_Corp is Company
+Programming is Skill
+JavaScript is Technology
+React is Technology
+
+# Explicit relationships
+Alice works_at Acme_Corp
+Bob works_at Acme_Corp
+Alice has_skill Programming
+Bob has_skill Programming
+Programming uses JavaScript
+Programming uses React
+Alice leads Project_Alpha
+Bob works_on Project_Alpha
+
+# The system infers:
+Alice and Bob are colleagues
+Alice and Bob share skills
+Project_Alpha uses JavaScript
+Project_Alpha uses React
+```
+
+## What Makes It Different?
+
+### 🧠 **Semantic Understanding**
+
+- Models knowledge through concepts and relationships
+- Automatic inference of implicit connections
+- Builds semantic networks, not just data structures
+
+### 🔗 **Schema and Data Together**
+
+- Define structure alongside actual data
+- Self-documenting knowledge representations
+- Easy to understand and maintain
+
+### 🔌 **Plugin Hooks**
+
+- Plugins tap into concepts to provide functionality
+- Interact with external resources seamlessly
+- Transfer information between systems
+
+### 🌐 **Domain Agnostic**
+
+- Works across any domain or field
+- Flexible concept and relationship modeling
+- Adaptable to different use cases
+
+## Getting Started
+
+### Installation
+
+```bash
+npm install -g concept-lang
+```
+
+### Your First Knowledge Base
+
+Create a file called `knowledge.concept`:
+
+```concept
+# Define basic concepts
+Person is entity
+Skill is capability
+Company is organization
+
+# Define relationships
+Alice is Person
+Programming is Skill
+Acme_Corp is Company
+
+# Explicit relationships
+Alice has_skill Programming
+Alice works_at Acme_Corp
+
+# The system will infer additional relationships
+```
+
+### Run It
+
+```bash
+concept run knowledge.concept
+```
+
+### Run with Plugins
+
+```bash
+concept run knowledge.concept --plugins ./plugins/db/index.js --plugins ./plugins/http/index.js
+```
 
 ## Examples
 
 Check out the `examples/` directory for:
+
 - `working-demo.concept` - Basic capabilities demonstration
 - `task-manager-fixed.concept` - Complete application example
 - `plugins/*/examples/` - Plugin-specific examples
 
 ## Philosophy
 
-Concept Language is built on the belief that **programming should be about expressing ideas, not fighting syntax**.
+Concept Language is built on the belief that **knowledge should be represented as interconnected concepts, not isolated data**.
 
-- **Clarity over cleverness**
-- **Readability over performance** (initially)
-- **Understanding over memorization**
-- **Ideas over implementation details**
+- **Relationships matter** - How concepts connect defines meaning
+- **Inference is powerful** - Discover what you didn't explicitly state
+- **Schema and data together** - Structure and content in one place
+- **Plugins extend reality** - Make concepts useful in the real world
 
 ## Contributing
 
-We're building something new and exciting! Help us shape the future of programming:
+We're building the future of knowledge representation! Help us shape this revolutionary system:
 
-1. Try the language and share feedback
-2. Create examples and tutorials
-3. Build plugins and extensions
-4. Help us improve the syntax and features
+1. Try the system and share feedback
+2. Create knowledge base examples
+3. Build plugins for new domains
+4. Help us improve inference rules
+5. Contribute to the semantic network capabilities
 
 ## License
 
 MIT License - see LICENSE file for details
 
 ---
-
-**Ready to think in concepts?** Start with the examples and see how natural programming can be.
