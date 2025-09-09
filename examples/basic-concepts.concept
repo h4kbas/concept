@@ -1,0 +1,15 @@
+# Basic Concepts Example
+# This file demonstrates basic concept creation and relationships
+
+apple is fruit
+banana is fruit
+orange is fruit
+
+fruit is food
+vegetable is food
+
+carrot is vegetable
+broccoli is vegetable
+
+# Test basic relationships
+say Basic concepts created successfully

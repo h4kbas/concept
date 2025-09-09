@@ -1,0 +1,22 @@
+# Relationships Example
+# This file demonstrates various relationship types
+
+# Positive relationships
+dog is animal
+cat is animal
+bird is animal
+
+# Negative relationships
+dog isnt cat
+cat isnt bird
+
+# Complex relationships
+mammal is animal
+dog is mammal
+cat is mammal
+bird isnt mammal
+
+# Test relationship inspection
+inspect dog
+inspect animal
+inspect mammal

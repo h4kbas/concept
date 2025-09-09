@@ -1,0 +1,44 @@
+# Detailed Inference Test
+# This file tests the automatic inference system step by step
+
+say "Starting inference test..."
+
+# Step 1: Create basic relationships
+mammal is animal
+dog is mammal
+cat is mammal
+
+say "Created basic relationships: mammal is animal, dog is mammal, cat is mammal"
+
+# Step 2: Test what should be inferred
+# The system should infer: dog is animal, cat is animal
+
+say "Testing inference results..."
+
+# Step 3: Test negative relationships
+bird is animal
+bird isnt mammal
+
+say "Created negative relationship: bird isnt mammal"
+
+# Step 4: Test complex inference
+# If bird isnt mammal and dog is mammal, then bird isnt dog (should be inferred)
+
+say "Testing complex inference..."
+
+# Step 5: Test transitive inference
+a is b
+b is c
+c is d
+
+say "Created transitive chain: a is b, b is c, c is d"
+say "Should infer: a is c, a is d, b is d"
+
+# Final inspection
+inspect dog
+inspect cat
+inspect bird
+inspect a
+inspect b
+inspect c
+inspect d

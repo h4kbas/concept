@@ -272,6 +272,9 @@ program
     }
   });
 
+// Blocks are native to the language - any command can have a block
+// We use Shift+Enter to enable block mode for any command
+
 program
   .command('repl')
   .description('Start an interactive REPL for testing concepts')
@@ -286,22 +289,27 @@ program
         prompt: 'concept> ',
       });
 
-      // Create a persistent compiler instance
-      const compiler = new Compiler();
+      // Enable raw mode for keypress detection
+      if (process.stdin.setRawMode) {
+        process.stdin.setRawMode(true);
+      }
+      process.stdin.resume();
 
       // Load plugins if specified
-      let runner: ConceptRunnerImpl | null = null;
-      if (options.plugins && options.plugins.length > 0) {
-        runner = new ConceptRunnerImpl();
-        const config: RunnerConfig = {
-          plugins: options.plugins,
-          watchMode: false,
-          autoReload: false,
-          logLevel: 'info',
-          outputDir: './repl-output',
-        };
-        await runner.initialize(config);
-      }
+      const runner = new ConceptRunnerImpl();
+      const allPlugins = [...(options.plugins || [])];
+
+      const config: RunnerConfig = {
+        plugins: allPlugins,
+        watchMode: false,
+        autoReload: false,
+        logLevel: 'info',
+        outputDir: './repl-output',
+      };
+      await runner.initialize(config);
+
+      // Use the runner's compiler which has all the hooks
+      const compiler = runner.getCompiler();
 
       if (!options.infer) {
         compiler.block['inferMissingPairs'] = () => {};
@@ -316,12 +324,32 @@ program
       console.log('  .plugins  - Show loaded plugins');
       console.log('  .quit     - Exit the REPL');
       console.log('');
+      console.log(
+        '💡 Blocks are native to the language - any command can have a block'
+      );
+      console.log('   - Type any command and press Enter to execute normally');
+      console.log(
+        '   - Add indented content on the next line to create a block'
+      );
+      console.log(
+        '   - Press Enter on empty line to finish and execute the block'
+      );
+      console.log(
+        '   Examples: "user is", "db create users", "file write data.txt", "inspect apple"'
+      );
+      console.log('');
+
+      // Multi-line input handling for native blocks
+      let currentInput = '';
+      let inBlock = false;
+      let lastCommand = '';
 
       rl.prompt();
 
       rl.on('line', async (input: string) => {
         const trimmed = input.trim();
 
+        // Handle special commands
         if (trimmed === '.quit' || trimmed === '.exit') {
           console.log('👋 Goodbye!');
           if (runner) {
@@ -339,6 +367,22 @@ program
           console.log('  .plugins  - Show loaded plugins');
           console.log('  .quit     - Exit the REPL');
           console.log('');
+          console.log(
+            '💡 Blocks are native to the language - any command can have a block'
+          );
+          console.log(
+            '   - Type any command and press Enter to execute normally'
+          );
+          console.log(
+            '   - Add indented content on the next line to create a block'
+          );
+          console.log(
+            '   - Press Enter on empty line to finish and execute the block'
+          );
+          console.log(
+            '   Examples: "user is", "db create users", "file write data.txt", "inspect apple"'
+          );
+          console.log('');
           rl.prompt();
           return;
         }
@@ -351,6 +395,11 @@ program
           }
           // Replace the current compiler
           Object.assign(compiler, newCompiler);
+          // Reset block state
+          currentInput = '';
+          inBlock = false;
+          lastCommand = '';
+          rl.setPrompt('concept> ');
           console.log('✅ State cleared');
           rl.prompt();
           return;
@@ -367,7 +416,14 @@ program
           if (concepts.length > 0) {
             console.log('\nConcepts:');
             concepts.forEach((concept: Concept) => {
-              console.log(`  - ${concept.name}`);
+              // Color code concepts - blue for regular concepts, green for boxed concepts
+              if (concept.block && concept.block.length > 0) {
+                console.log(
+                  `  - \x1b[32m${concept.name}\x1b[0m \x1b[90m(boxed)\x1b[0m`
+                );
+              } else {
+                console.log(`  - \x1b[34m${concept.name}\x1b[0m`);
+              }
             });
           }
 
@@ -375,8 +431,9 @@ program
             console.log('\nRelationships:');
             chain.forEach((data: Data) => {
               const relation = data.value ? 'is' : 'isnt';
+              const relationColor = data.value ? '\x1b[32m' : '\x1b[31m'; // Green for 'is', red for 'isnt'
               console.log(
-                `  ${data.pair.conceptA.name} ${relation} ${data.pair.conceptB.name}`
+                `  \x1b[34m${data.pair.conceptA.name}\x1b[0m ${relationColor}${relation}\x1b[0m \x1b[34m${data.pair.conceptB.name}\x1b[0m`
               );
             });
           }
@@ -404,30 +461,135 @@ program
           return;
         }
 
+
+        // Handle multi-line input for native blocks
         if (trimmed === '') {
+          if (inBlock && currentInput.trim() !== '') {
+            // End of block - process the accumulated input
+            try {
+              // Use the compiler directly instead of creating temporary files
+              compiler.compile(currentInput);
+            } catch (error) {
+              console.error(
+                `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+              );
+            }
+            currentInput = '';
+            inBlock = false;
+            rl.setPrompt('concept> ');
+          } else if (lastCommand && !inBlock) {
+            // Command that could have a block but no indented content - process it now
+            try {
+              compiler.compile(lastCommand);
+            } catch (error) {
+              console.error(
+                `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+              );
+            }
+            lastCommand = '';
+          }
           rl.prompt();
           return;
         }
 
-        try {
-          // Execute the concept statement
-          if (runner) {
-            // Use runner for plugin support
-            const tempFile = './temp-repl.concept';
-            writeFileSync(tempFile, trimmed, 'utf-8');
-            await runner.runFile(tempFile);
-            // Clean up temp file
-            if (existsSync(tempFile)) {
-              require('fs').unlinkSync(tempFile);
-            }
+        // If we're in a block, add this line
+        if (inBlock) {
+          currentInput += '\n' + input;
+          rl.prompt();
+          return;
+        }
+
+        // Check if this is an indented line (should be part of a block)
+        const indent = input.length - input.trimStart().length;
+        if (!inBlock && indent > 0 && trimmed !== '') {
+          // This is an indented line - process it as a standalone boxed concept
+          if (lastCommand) {
+            // If there's a last command, treat it as a command with a block
+            currentInput = lastCommand + '\n' + input;
+            inBlock = true;
+            console.log('DEBUG: Created block, currentInput:', currentInput);
+            rl.prompt();
+            return;
           } else {
-            // Use simple compiler
-            compiler.compile(trimmed);
+            // Standalone indented content - process it directly
+            try {
+              compiler.compile(input);
+            } catch (error) {
+              console.error(
+                `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+              );
+            }
+            rl.prompt();
+            return;
           }
-        } catch (error) {
-          console.error(
-            `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+        }
+
+        // Process any pending blocks first
+        if (inBlock && currentInput.trim() !== '') {
+          // We were in block mode but now have a non-indented command - process the block
+          try {
+            compiler.compile(currentInput);
+          } catch (error) {
+            console.error(
+              `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+            );
+          }
+          currentInput = '';
+          inBlock = false;
+          lastCommand = '';
+        }
+
+        // Process single-line commands normally
+        if (!inBlock && trimmed !== '') {
+          console.log(
+            'DEBUG: Processing single-line command, currentInput:',
+            currentInput
           );
+          // First, process any pending block if we have one
+          if (currentInput.trim() !== '') {
+            console.log('DEBUG: Processing pending block:', currentInput);
+            try {
+              compiler.compile(currentInput);
+            } catch (error) {
+              console.error(
+                `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+              );
+            }
+            currentInput = '';
+            lastCommand = '';
+          }
+
+          // Store the last command for potential block usage
+          lastCommand = trimmed;
+
+          // Check if this command could have a block (ends with certain keywords)
+          const couldHaveBlock =
+            trimmed.endsWith(' is') ||
+            trimmed.endsWith(' create') ||
+            trimmed.endsWith(' write') ||
+            trimmed.endsWith(' read') ||
+            trimmed.endsWith(' update') ||
+            trimmed.endsWith(' delete') ||
+            trimmed.endsWith(' say') ||
+            trimmed.endsWith(' print') ||
+            trimmed.endsWith(' echo');
+
+          if (couldHaveBlock) {
+            // Don't process immediately - wait to see if next line is indented
+            rl.prompt();
+            return;
+          } else {
+            // Process immediately for commands that don't typically have blocks
+            try {
+              compiler.compile(trimmed);
+            } catch (error) {
+              console.error(
+                `❌ Error: ${error instanceof Error ? error.message : String(error)}`
+              );
+            }
+            rl.prompt();
+            return;
+          }
         }
 
         rl.prompt();

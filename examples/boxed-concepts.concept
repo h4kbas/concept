@@ -1,0 +1,22 @@
+# Boxed Concepts Example
+# This file demonstrates indented boxed concepts
+
+person
+    name
+    age
+    occupation
+
+student
+    person
+    school
+    grade
+
+teacher
+    person
+    subject
+    experience
+
+# Test boxed concept inspection
+inspect person
+inspect student
+inspect teacher

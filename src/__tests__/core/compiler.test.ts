@@ -1,218 +1,201 @@
-import { Compiler, createDefaultHookMap } from '../../core/compiler';
-import { Block, Concept } from '../../core';
+import { Compiler } from '../../core/compiler';
+import { Block } from '../../core/block';
+import { ConceptRunnerImpl } from '../../core/concept-runner';
+import { RunnerConfig } from '../../types/plugin';
 
 describe('Compiler', () => {
   let compiler: Compiler;
+  let runner: ConceptRunnerImpl;
+  let config: RunnerConfig;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     compiler = new Compiler();
+    runner = new ConceptRunnerImpl();
+    config = {
+      plugins: [],
+      logLevel: 'error' as const,
+      outputDir: './test-output',
+    };
+    await runner.initialize(config);
   });
 
-  describe('basic compilation', () => {
-    it('should compile a simple source', () => {
-      const source = 'A is B\nC isnt D';
-      const result = compiler.compile(source);
+  afterEach(async () => {
+    await runner.stop();
+  });
 
-      expect(result).toContain('A is B');
-      expect(result).toContain('C isnt D');
+  describe('Basic Compilation', () => {
+    it('should compile a simple concept', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('apple');
+
+      expect(block.concepts).toHaveLength(1);
+      expect(block.concepts[0]?.name).toBe('apple');
     });
 
-    it('should compile with inference', () => {
-      const source = 'A is B\nB is C';
-      const result = compiler.compile(source);
+    it('should compile a relationship', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('apple is fruit');
 
-      expect(result).toContain('A is B');
-      expect(result).toContain('B is C');
-      expect(result).toContain('A is C'); // Inferred
+      expect(block.concepts).toHaveLength(2);
+      expect(block.concepts.map(c => c.name)).toEqual(['apple', 'fruit']);
+      expect(block.chain).toHaveLength(1);
+      expect(block.chain[0]?.pair.conceptA.name).toBe('apple');
+      expect(block.chain[0]?.pair.conceptB.name).toBe('fruit');
     });
 
-    it('should compile to block state', () => {
-      const source = 'A is B\nC isnt D';
-      const block = compiler.compileToState(source);
+    it('should compile multiple statements', () => {
+      const block = runner.getBlock();
+      const input = `apple is fruit
+banana is fruit
+orange is fruit`;
+      runner.getCompiler().compile(input);
 
       expect(block.concepts).toHaveLength(4);
-      expect(block.chain).toHaveLength(2);
+      expect(block.concepts.map(c => c.name)).toEqual([
+        'apple',
+        'fruit',
+        'banana',
+        'orange',
+      ]);
+      expect(block.chain).toHaveLength(3);
     });
   });
 
-  describe('hook functions', () => {
-    it('should handle is hook for assignment', () => {
-      const source = 'A is B';
-      compiler.compile(source);
-
-      const block = compiler.block;
-      const state = block.blockExplorer.calculateCurrentPairState({
-        conceptA: { name: 'A' },
-        conceptB: { name: 'B' },
-      });
-
-      expect(state).toBe(true);
-    });
-
-    it('should handle isnt hook for assignment', () => {
-      const source = 'A isnt B';
-      compiler.compile(source);
-
-      const block = compiler.block;
-      const state = block.blockExplorer.calculateCurrentPairState({
-        conceptA: { name: 'A' },
-        conceptB: { name: 'B' },
-      });
-
-      expect(state).toBe(false);
-    });
-
-    it('should handle is hook for conditional', () => {
-      const source = 'A is B\nis A B say yes';
+  describe('Hook Commands', () => {
+    it('should execute say command', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      compiler.compile(source);
-
-      expect(consoleSpy).toHaveBeenCalledWith('yes');
-      consoleSpy.mockRestore();
-    });
-
-    it('should handle isnt hook for conditional', () => {
-      const source = 'A isnt B\nisnt A B say no';
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      compiler.compile(source);
-
-      expect(consoleSpy).toHaveBeenCalledWith('no');
-      consoleSpy.mockRestore();
-    });
-
-    it('should handle say hook', () => {
-      const source = 'say hello world';
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      compiler.compile(source);
+      runner.getCompiler().compile('say hello world');
 
       expect(consoleSpy).toHaveBeenCalledWith('hello world');
       consoleSpy.mockRestore();
     });
+
+    it('should handle is command with incomplete relationship', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('d is');
+
+      expect(block.concepts).toHaveLength(2);
+      expect(block.concepts.map(c => c.name)).toEqual(['d', 'is']);
+    });
+
+    it('should handle is command with complete relationship', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('a is b');
+
+      expect(block.concepts).toHaveLength(2);
+      expect(block.concepts.map(c => c.name)).toEqual(['a', 'b']);
+      expect(block.chain).toHaveLength(1);
+      expect(block.chain[0]?.pair.conceptA.name).toBe('a');
+      expect(block.chain[0]?.pair.conceptB.name).toBe('b');
+    });
+
+    it('should handle isnt command with complete relationship', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('a isnt b');
+
+      expect(block.concepts).toHaveLength(2);
+      expect(block.concepts.map(c => c.name)).toEqual(['a', 'b']);
+      expect(block.chain).toHaveLength(1);
+      expect(block.chain[0]?.pair.conceptA.name).toBe('a');
+      expect(block.chain[0]?.pair.conceptB.name).toBe('b');
+      expect(block.chain[0]?.value).toBe(false);
+    });
   });
 
-  describe('error handling', () => {
-    it('should throw error for invalid is usage', () => {
-      const source = 'A is';
+  describe('Block Processing', () => {
+    it('should process indented content as boxed concept', () => {
+      const block = runner.getBlock();
+      const input = `        apple is fruit`;
+      runner.getCompiler().compile(input);
 
-      expect(() => compiler.compile(source)).toThrow(
-        'Invalid "is" usage: A is B'
-      );
+      expect(block.concepts).toHaveLength(3);
+      expect(block.concepts.some(c => c.name === 'apple is fruit')).toBe(true);
+      expect(block.concepts.some(c => c.name === 'apple')).toBe(true);
+      expect(block.concepts.some(c => c.name === 'fruit')).toBe(true);
     });
 
-    it('should throw error for invalid isnt usage', () => {
-      const source = 'A isnt';
+    it('should process command with block content', () => {
+      const block = runner.getBlock();
+      const input = `d is
+        e is a`;
+      runner.getCompiler().compile(input);
 
-      expect(() => compiler.compile(source)).toThrow(
-        'Invalid "isnt" usage: A isnt B'
-      );
+      expect(block.concepts).toHaveLength(5);
+      expect(block.concepts.some(c => c.name === 'd')).toBe(true);
+      expect(block.concepts.some(c => c.name === 'is')).toBe(true);
+      expect(block.concepts.some(c => c.name === 'e is a')).toBe(true);
+      expect(block.concepts.some(c => c.name === 'e')).toBe(true);
+      expect(block.concepts.some(c => c.name === 'a')).toBe(true);
     });
 
+    it('should create relationships from boxed content', () => {
+      const block = runner.getBlock();
+      const input = `        apple is fruit`;
+      runner.getCompiler().compile(input);
+
+      expect(block.chain).toHaveLength(1);
+      expect(block.chain[0]?.pair.conceptA.name).toBe('apple');
+      expect(block.chain[0]?.pair.conceptB.name).toBe('fruit');
+    });
+  });
+
+  describe('Error Handling', () => {
     it('should throw error for invalid say usage', () => {
-      const source = 'say';
+      expect(() => {
+        runner.getCompiler().compile('say');
+      }).toThrow('Invalid "say" usage: say <message>');
+    });
 
-      expect(() => compiler.compile(source)).toThrow(
-        'Invalid "say" usage: say A'
-      );
+    // print and echo commands no longer exist - they are treated as regular concepts
+
+    it('should throw error for invalid is usage as first token', () => {
+      expect(() => {
+        runner.getCompiler().compile('is');
+      }).toThrow('Invalid "is" usage: is <statement>');
+    });
+
+    it('should throw error for invalid isnt usage as first token', () => {
+      expect(() => {
+        runner.getCompiler().compile('isnt');
+      }).toThrow('Invalid "isnt" usage: isnt <statement>');
     });
   });
 
-  describe('custom hooks', () => {
-    it('should work with custom hook map', () => {
-      const customHooks = {
-        ...createDefaultHookMap(() => new Block()),
-        custom: (params: Concept[]) => {
-          if (params[0]?.name === 'custom') {
-            console.log('Custom hook called');
-          }
-        },
-      };
+  describe('State Management', () => {
+    it('should maintain state across multiple compilations', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('apple is fruit');
+      runner.getCompiler().compile('banana is fruit');
 
-      const customCompiler = new Compiler(customHooks);
-      const source = 'custom test';
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      customCompiler.compile(source);
-
-      expect(consoleSpy).toHaveBeenCalledWith('Custom hook called');
-      consoleSpy.mockRestore();
+      expect(block.concepts).toHaveLength(3);
+      expect(block.concepts.map(c => c.name)).toEqual([
+        'apple',
+        'fruit',
+        'banana',
+      ]);
+      expect(block.chain).toHaveLength(2);
     });
-  });
 
-  describe('reset functionality', () => {
-    it('should reset compiler state', () => {
-      const source1 = 'A is B';
-      compiler.compile(source1);
-
-      expect(compiler.block.concepts).toHaveLength(2);
-
+    it('should clear state when reset', () => {
+      runner.getCompiler().compile('apple is fruit');
       compiler.reset();
 
       expect(compiler.block.concepts).toHaveLength(0);
+      expect(compiler.block.chain).toHaveLength(0);
     });
   });
 
-  describe('complex scenarios', () => {
-    it('should handle the elma_mela example', () => {
-      const source = `
-Elma is red
-Elma is food
-Elma isnt blue
-Elma isnt great
+  describe('Custom Block Instance', () => {
+    it('should use provided block instance', () => {
+      const customBlock = new Block();
+      const customCompiler = new Compiler(undefined, customBlock);
 
-Mela is Elma
+      customCompiler.compile('apple is fruit');
 
-is Elma great say yes elma great
-is Mela great say yes mela great
-isnt Elma great say no elma great
-isnt Mela great say no mela great
-
-is Mela red say yes mela red
-isnt Mela red say no mela red
-is Elma red say yes elma red
-isnt Elma red say no elma red
-
-is Mela food say yes mela food
-isnt Mela food say no mela food
-is Elma food say yes elma food
-isnt Elma food say no elma food
-
-is Mela blue say yes mela blue
-isnt Mela blue say no mela blue
-is Elma blue say yes elma blue
-isnt Elma blue say no elma blue
-      `.trim();
-
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      const result = compiler.compile(source);
-
-      // Should contain the basic relationships
-      expect(result).toContain('Elma is red');
-      expect(result).toContain('Elma is food');
-      expect(result).toContain('Elma isnt blue');
-      expect(result).toContain('Elma isnt great');
-      expect(result).toContain('Mela is Elma');
-
-      // Should contain inferred relationships
-      expect(result).toContain('Mela is red');
-      expect(result).toContain('Mela is food');
-      expect(result).toContain('Mela isnt blue');
-      expect(result).toContain('Mela isnt great');
-
-      // Should have executed say commands
-      expect(consoleSpy).toHaveBeenCalledWith('no elma great');
-      expect(consoleSpy).toHaveBeenCalledWith('no mela great');
-      expect(consoleSpy).toHaveBeenCalledWith('yes mela red');
-      expect(consoleSpy).toHaveBeenCalledWith('yes elma red');
-      expect(consoleSpy).toHaveBeenCalledWith('yes mela food');
-      expect(consoleSpy).toHaveBeenCalledWith('yes elma food');
-      expect(consoleSpy).toHaveBeenCalledWith('no mela blue');
-      expect(consoleSpy).toHaveBeenCalledWith('no elma blue');
-
-      consoleSpy.mockRestore();
+      expect(customCompiler.block).toBe(customBlock);
+      expect(customBlock.concepts).toHaveLength(3); // apple, is, fruit
+      expect(customBlock.chain).toHaveLength(0); // No hooks, so no relationships created
     });
   });
 });

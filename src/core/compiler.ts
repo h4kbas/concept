@@ -1,79 +1,11 @@
-import { Concept, HookMap } from '../types';
+import { HookMap } from '../types';
 import { Block } from './block';
 
 /**
- * Built-in hook functions for the Concept language
+ * Create default hook map - no default hooks, all commands are in plugins
  */
-export const createDefaultHookMap = (getBlock: () => Block): HookMap => ({
-  is: (params: Concept[]): Concept[] | void => {
-    const block = getBlock();
-    if (params[0]?.name !== 'is') {
-      if (params.length < 3) {
-        throw new Error('Invalid "is" usage: A is B');
-      }
-
-      const [a, , ...b] = params;
-      if (!a) {
-        throw new Error('Invalid "is" usage: A is B');
-      }
-      // For "A is B", we just add the relationship directly
-      if (b.length === 1 && b[0]) {
-        block.addToChain(a, b[0], true);
-      }
-    } else {
-      if (params.length < 4) {
-        throw new Error('Invalid "is" usage: is A B C');
-      }
-      const [, a, b, ...c] = params;
-      if (!a || !b) {
-        throw new Error('Invalid "is" usage: is A B C');
-      }
-      const pairState = block.blockExplorer.calculateCurrentPairState({
-        conceptA: a,
-        conceptB: b,
-      });
-      return pairState === true ? c : [];
-    }
-  },
-
-  isnt: (params: Concept[]): Concept[] | void => {
-    const block = getBlock();
-    if (params[0]?.name !== 'isnt') {
-      if (params.length < 3) {
-        throw new Error('Invalid "isnt" usage: A isnt B');
-      }
-
-      const [a, , ...b] = params;
-      if (!a) {
-        throw new Error('Invalid "isnt" usage: A isnt B');
-      }
-      // For "A isnt B", we just add the relationship directly
-      if (b.length === 1 && b[0]) {
-        block.addToChain(a, b[0], false);
-      }
-    } else {
-      if (params.length < 4) {
-        throw new Error('Invalid "isnt" usage: isnt A B C');
-      }
-      const [, a, b, ...c] = params;
-      if (!a || !b) {
-        throw new Error('Invalid "isnt" usage: isnt A B C');
-      }
-      const pairState = block.blockExplorer.calculateCurrentPairState({
-        conceptA: a,
-        conceptB: b,
-      });
-      return pairState === false ? c : [];
-    }
-  },
-
-  say: (params: Concept[]): void => {
-    if (params.length < 2) {
-      throw new Error('Invalid "say" usage: say A');
-    }
-    const [, ...a] = params;
-    console.log(a.map(c => c.name).join(' '));
-  },
+export const createDefaultHookMap = (_getBlock: () => Block): HookMap => ({
+  // No default hooks - all commands are now in plugins
 });
 
 /**
@@ -82,8 +14,8 @@ export const createDefaultHookMap = (getBlock: () => Block): HookMap => ({
 export class Compiler {
   private readonly _block: Block;
 
-  constructor(hookMap?: HookMap) {
-    this._block = new Block();
+  constructor(hookMap?: HookMap, block?: Block) {
+    this._block = block || new Block();
     const actualHookMap = hookMap || createDefaultHookMap(() => this._block);
     // Update the block with the hook map
     this._block['_hookMap'] = actualHookMap;

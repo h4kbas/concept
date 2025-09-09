@@ -17,16 +17,28 @@ export class ConceptRunnerImpl implements ConceptRunner {
   constructor() {
     this.block = new Block();
     this.pluginManager = new ConceptPluginManager(this.block);
-    this.compiler = new Compiler();
+    // Don't create compiler here - it will be created in initialize()
+    this.compiler = null as any;
   }
 
   async initialize(config: RunnerConfig): Promise<void> {
     this.config = config;
 
     console.log('🚀 Initializing Concept Runner...');
-    console.log(`📦 Loading ${config.plugins.length} plugins...`);
 
-    // Load all plugins
+    // Load std plugin by default
+    try {
+      await this.pluginManager.loadPlugin('./dist/plugins/std/index.js');
+    } catch (error) {
+      console.error('Failed to load std plugin:', error);
+      if (config.logLevel === 'debug') {
+        console.error(error);
+      }
+    }
+
+    console.log(`📦 Loading ${config.plugins.length} additional plugins...`);
+
+    // Load all additional plugins
     for (const pluginPath of config.plugins) {
       try {
         await this.pluginManager.loadPlugin(pluginPath);
@@ -94,7 +106,7 @@ export class ConceptRunnerImpl implements ConceptRunner {
     const pluginHooks: any = {};
     for (const plugin of plugins) {
       if (plugin.getHooks) {
-        const hooks = plugin.getHooks();
+        const hooks = plugin.getHooks(this.block);
         Object.assign(pluginHooks, hooks);
       }
     }
@@ -104,10 +116,11 @@ export class ConceptRunnerImpl implements ConceptRunner {
     const defaultHooks = createDefaultHookMap(() => this.block);
     const combinedHooks = { ...defaultHooks, ...pluginHooks };
 
-    this.compiler = new Compiler(combinedHooks);
+    // Create compiler with the existing block and combined hooks
+    this.compiler = new Compiler(combinedHooks, this.block);
   }
 
-  async runFile(filePath: string): Promise<void> {
+  async runFile(filePath: string): Promise<string> {
     if (!this.config) {
       throw new Error('Runner not initialized. Call initialize() first.');
     }
@@ -159,6 +172,7 @@ export class ConceptRunnerImpl implements ConceptRunner {
       }
 
       console.log('✅ File execution completed successfully');
+      return result;
     } catch (error) {
       console.error(`❌ Error running file ${fullPath}:`, error);
       throw error;
@@ -286,5 +300,16 @@ export class ConceptRunnerImpl implements ConceptRunner {
 
   getLoadedPlugins(): string[] {
     return this.pluginManager.getLoadedPluginNames();
+  }
+
+  getCompiler(): Compiler {
+    return this.compiler;
+  }
+
+  /**
+   * Get the block instance
+   */
+  getBlock(): Block {
+    return this.block;
   }
 }

@@ -1,0 +1,46 @@
+# Complex Example
+# This file demonstrates multiple features working together
+
+# Basic concepts
+vehicle
+    wheels
+    engine
+    fuel
+
+car
+    vehicle
+    doors
+    seats
+
+truck
+    vehicle
+    cargo_bed
+    towing_capacity
+
+# Relationships
+car is vehicle
+truck is vehicle
+car isnt truck
+
+# Transportation hierarchy
+transportation
+    vehicle
+    bicycle
+    motorcycle
+
+bicycle
+    transportation
+    pedals
+    chain
+
+motorcycle
+    transportation
+    engine
+    handlebars
+
+# Test complex relationships
+say "Complex example loaded"
+inspect vehicle
+inspect transportation
+inspect car
+inspect bicycle

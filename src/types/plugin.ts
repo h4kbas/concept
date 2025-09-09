@@ -84,10 +84,9 @@ export interface ConceptPlugin {
   /**
    * Get plugin-specific hooks for the compiler
    */
-  getHooks?(): Record<
-    string,
-    (params: Concept[], block?: Concept[]) => Concept[] | void
-  >;
+  getHooks?(
+    block?: any
+  ): Record<string, (params: Concept[], block?: Concept[]) => Concept[] | void>;
 }
 
 /**
@@ -159,7 +158,7 @@ export interface ConceptRunner {
   /**
    * Run a concept file with all loaded plugins
    */
-  runFile(filePath: string): Promise<void>;
+  runFile(filePath: string): Promise<string>;
 
   /**
    * Watch a directory for changes and run files

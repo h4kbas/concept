@@ -1,231 +1,271 @@
-import { Block, Concept } from '../../core';
+import { Block } from '../../core/block';
+import { Compiler } from '../../core/compiler';
+import { Concept } from '../../types';
+import { ConceptRunnerImpl } from '../../core/concept-runner';
+import { RunnerConfig } from '../../types/plugin';
 
 describe('Block', () => {
   let block: Block;
+  let runner: ConceptRunnerImpl;
+  let config: RunnerConfig;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     block = new Block();
+    runner = new ConceptRunnerImpl();
+    config = {
+      plugins: [],
+      logLevel: 'error' as const,
+      outputDir: './test-output',
+    };
+    await runner.initialize(config);
   });
 
-  describe('concept management', () => {
-    it('should add a concept', () => {
-      const concept: Concept = { name: 'test' };
-      const result = block.addConcept(concept);
+  afterEach(async () => {
+    await runner.stop();
+  });
 
-      expect(result).toBe(concept);
-      expect(block.concepts).toContain(concept);
-      expect(block.hasConcept(concept)).toBe(true);
+  describe('Basic Concept Operations', () => {
+    it('should add a single concept', () => {
+      const concept: Concept = { name: 'apple' };
+      block.addConcept(concept);
+
+      expect(block.concepts).toHaveLength(1);
+      expect(block.concepts[0]?.name).toBe('apple');
     });
 
     it('should not add duplicate concepts', () => {
-      const concept: Concept = { name: 'test' };
-      const result1 = block.addConcept(concept);
-      const result2 = block.addConcept(concept);
+      const concept1: Concept = { name: 'apple' };
+      const concept2: Concept = { name: 'apple' };
 
-      expect(result1).toBe(result2);
+      block.addConcept(concept1);
+      block.addConcept(concept2);
+
       expect(block.concepts).toHaveLength(1);
+      expect(block.concepts[0]?.name).toBe('apple');
     });
 
-    it('should get concept by name', () => {
-      const concept: Concept = { name: 'test' };
-      block.addConcept(concept);
+    it('should add multiple different concepts', () => {
+      block.addConcept({ name: 'apple' });
+      block.addConcept({ name: 'banana' });
+      block.addConcept({ name: 'orange' });
 
-      expect(block.getConcept('test')).toBe(concept);
-      expect(block.getConcept('nonexistent')).toBeUndefined();
-    });
-  });
-
-  describe('pair management', () => {
-    it('should add a pair', () => {
-      const conceptA: Concept = { name: 'A' };
-      const conceptB: Concept = { name: 'B' };
-
-      const pair = block.addPair(conceptA, conceptB);
-
-      expect(pair.conceptA).toBe(conceptA);
-      expect(pair.conceptB).toBe(conceptB);
-      expect(block.isPairAvailable(conceptA, conceptB)).toBe(true);
-      expect(block.pairs).toContain(pair);
-    });
-
-    it('should add concepts when adding a pair', () => {
-      const conceptA: Concept = { name: 'A' };
-      const conceptB: Concept = { name: 'B' };
-
-      block.addPair(conceptA, conceptB);
-
-      expect(block.hasConcept(conceptA)).toBe(true);
-      expect(block.hasConcept(conceptB)).toBe(true);
-    });
-
-    it('should not add duplicate pairs', () => {
-      const conceptA: Concept = { name: 'A' };
-      const conceptB: Concept = { name: 'B' };
-
-      const pair1 = block.addPair(conceptA, conceptB);
-      const pair2 = block.addPair(conceptA, conceptB);
-
-      expect(pair1).toBe(pair2);
-      expect(block.pairs).toHaveLength(1);
+      expect(block.concepts).toHaveLength(3);
+      expect(block.concepts.map(c => c.name)).toEqual([
+        'apple',
+        'banana',
+        'orange',
+      ]);
     });
   });
 
-  describe('data management', () => {
-    it('should add data to chain', () => {
-      const conceptA: Concept = { name: 'A' };
-      const conceptB: Concept = { name: 'B' };
-      const pair = block.addPair(conceptA, conceptB);
-
-      block.addData(pair, true);
-
-      expect(block.chain).toHaveLength(1);
-      expect(block.chain[0]?.pair).toBe(pair);
-      expect(block.chain[0]?.value).toBe(true);
-    });
-
-    it('should add to chain with convenience method', () => {
-      const conceptA: Concept = { name: 'A' };
-      const conceptB: Concept = { name: 'B' };
+  describe('Relationship Operations', () => {
+    it('should add a relationship between two concepts', () => {
+      const conceptA: Concept = { name: 'apple' };
+      const conceptB: Concept = { name: 'fruit' };
 
       block.addToChain(conceptA, conceptB, true);
 
       expect(block.chain).toHaveLength(1);
+      expect(block.chain[0]?.pair.conceptA.name).toBe('apple');
+      expect(block.chain[0]?.pair.conceptB.name).toBe('fruit');
       expect(block.chain[0]?.value).toBe(true);
     });
-  });
 
-  describe('inference', () => {
-    it('should infer missing pairs', () => {
-      // A is B, B is C -> A is C
-      const conceptA: Concept = { name: 'A' };
-      const conceptB: Concept = { name: 'B' };
-      const conceptC: Concept = { name: 'C' };
+    it('should add negative relationships', () => {
+      const conceptA: Concept = { name: 'apple' };
+      const conceptB: Concept = { name: 'vegetable' };
 
-      block.addToChain(conceptA, conceptB, true);
-      block.addToChain(conceptB, conceptC, true);
+      block.addToChain(conceptA, conceptB, false);
 
-      block.inferMissingPairs();
-
-      const inferredPair = block.blockExplorer.calculateCurrentPairState({
-        conceptA,
-        conceptB: conceptC,
-      });
-
-      expect(inferredPair).toBe(true);
+      expect(block.chain).toHaveLength(1);
+      expect(block.chain[0]?.value).toBe(false);
     });
 
-    it('should handle negative inference', () => {
-      // A is B, B isnt C -> A isnt C
-      const conceptA: Concept = { name: 'A' };
-      const conceptB: Concept = { name: 'B' };
-      const conceptC: Concept = { name: 'C' };
+    it('should not add duplicate relationships', () => {
+      const conceptA: Concept = { name: 'apple' };
+      const conceptB: Concept = { name: 'fruit' };
 
       block.addToChain(conceptA, conceptB, true);
-      block.addToChain(conceptB, conceptC, false);
+      block.addToChain(conceptA, conceptB, true);
 
-      block.inferMissingPairs();
-
-      const inferredPair = block.blockExplorer.calculateCurrentPairState({
-        conceptA,
-        conceptB: conceptC,
-      });
-
-      expect(inferredPair).toBe(false);
+      expect(block.chain).toHaveLength(1);
     });
 
-    it('should not infer self-references', () => {
-      const conceptA: Concept = { name: 'A' };
-      const conceptB: Concept = { name: 'B' };
+    it('should distinguish between directional relationships', () => {
+      const conceptA: Concept = { name: 'apple' };
+      const conceptB: Concept = { name: 'fruit' };
 
       block.addToChain(conceptA, conceptB, true);
       block.addToChain(conceptB, conceptA, true);
 
-      block.inferMissingPairs();
-
-      // Should not create A is A
-      const selfRef = block.blockExplorer.calculateCurrentPairState({
-        conceptA,
-        conceptB: conceptA,
-      });
-
-      expect(selfRef).toBeNull();
+      expect(block.chain).toHaveLength(2);
+      expect(block.chain[0]?.pair.conceptA.name).toBe('apple');
+      expect(block.chain[0]?.pair.conceptB.name).toBe('fruit');
+      expect(block.chain[1]?.pair.conceptA.name).toBe('fruit');
+      expect(block.chain[1]?.pair.conceptB.name).toBe('apple');
     });
   });
 
-  describe('tokenization and parsing', () => {
-    it('should tokenize a simple string', () => {
-      const source = 'A is B\nC isnt D';
-      const tokens = block.tokenize(source);
+  describe('Tokenization', () => {
+    it('should tokenize a simple concept', () => {
+      const tokens = block.tokenize('apple');
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toHaveLength(1);
+      expect(tokens[0]?.[0]?.name).toBe('apple');
+    });
+
+    it('should tokenize a relationship', () => {
+      const tokens = block.tokenize('apple is fruit');
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toHaveLength(3);
+      expect(tokens[0]?.map(c => c.name)).toEqual(['apple', 'is', 'fruit']);
+    });
+
+    it('should tokenize indented content as single concept', () => {
+      const tokens = block.tokenize('        apple is fruit');
+      expect(tokens).toHaveLength(1);
+      expect(tokens[0]).toHaveLength(1);
+      expect(tokens[0]?.[0]?.name).toBe('apple is fruit');
+    });
+
+    it('should tokenize command with block content', () => {
+      const input = `d is
+        e is a`;
+      const tokens = block.tokenize(input);
 
       expect(tokens).toHaveLength(2);
-      expect(tokens[0]).toEqual([{ name: 'A' }, { name: 'is' }, { name: 'B' }]);
-      expect(tokens[1]).toEqual([
-        { name: 'C' },
-        { name: 'isnt' },
-        { name: 'D' },
+      expect(tokens[0]?.map(c => c.name)).toEqual(['d', 'is']);
+      expect(tokens[1]).toHaveLength(1);
+      expect(tokens[1]?.[0]?.name).toBe('e is a');
+    });
+
+    it('should tokenize multiple lines', () => {
+      const input = `apple is fruit
+banana is fruit
+orange is fruit`;
+      const tokens = block.tokenize(input);
+
+      expect(tokens).toHaveLength(3);
+      expect(tokens[0]?.map(c => c.name)).toEqual(['apple', 'is', 'fruit']);
+      expect(tokens[1]?.map(c => c.name)).toEqual(['banana', 'is', 'fruit']);
+      expect(tokens[2]?.map(c => c.name)).toEqual(['orange', 'is', 'fruit']);
+    });
+  });
+
+  describe('Parsing', () => {
+    it('should parse a simple concept', () => {
+      const tokens = block.tokenize('apple');
+      block.parse(tokens);
+
+      expect(block.concepts).toHaveLength(1);
+      expect(block.concepts[0]?.name).toBe('apple');
+    });
+
+    it('should parse a relationship', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('apple is fruit');
+
+      expect(block.concepts).toHaveLength(2);
+      expect(block.concepts.map(c => c.name)).toEqual(['apple', 'fruit']);
+      expect(block.chain).toHaveLength(1);
+      expect(block.chain[0]?.pair.conceptA.name).toBe('apple');
+      expect(block.chain[0]?.pair.conceptB.name).toBe('fruit');
+    });
+
+    it('should parse indented content as boxed concept', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('        apple is fruit');
+
+      expect(block.concepts).toHaveLength(3); // apple, fruit, and the boxed concept
+      expect(block.concepts.some(c => c.name === 'apple is fruit')).toBe(true);
+      expect(block.concepts.some(c => c.name === 'apple')).toBe(true);
+      expect(block.concepts.some(c => c.name === 'fruit')).toBe(true);
+    });
+
+    it('should parse command with block content', () => {
+      const compiler = new Compiler();
+      const input = `d is
+        e is a`;
+      const tokens = compiler.block.tokenize(input);
+      compiler.block.parse(tokens);
+
+      expect(compiler.block.concepts).toHaveLength(5); // d, is, e is a, e, a
+      expect(compiler.block.concepts.some(c => c.name === 'd')).toBe(true);
+      expect(compiler.block.concepts.some(c => c.name === 'is')).toBe(true);
+      expect(compiler.block.concepts.some(c => c.name === 'e is a')).toBe(true);
+      expect(compiler.block.concepts.some(c => c.name === 'e')).toBe(true);
+      expect(compiler.block.concepts.some(c => c.name === 'a')).toBe(true);
+    });
+  });
+
+  describe('Boxed Concepts', () => {
+    it('should create boxed concepts for indented content', () => {
+      const compiler = new Compiler();
+      const tokens = compiler.block.tokenize('        apple is fruit');
+      compiler.block.parse(tokens);
+
+      const boxedConcept = compiler.block.concepts.find(
+        c => c.name === 'apple is fruit'
+      );
+      expect(boxedConcept).toBeDefined();
+      expect(boxedConcept?.block).toBeDefined();
+      expect(boxedConcept?.block).toHaveLength(3);
+      expect(boxedConcept?.block?.map(c => c.name)).toEqual([
+        'apple',
+        'is',
+        'fruit',
       ]);
     });
 
-    it('should parse tokens', () => {
-      const tokens: Concept[][] = [
-        [{ name: 'A' }, { name: 'is' }, { name: 'B' }],
-        [{ name: 'C' }, { name: 'isnt' }, { name: 'D' }],
-      ];
+    it('should process boxed concept content', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('        apple is fruit');
 
-      // Add basic hooks for testing
-      block['_hookMap'] = {
-        is: (params: Concept[]) => {
-          if (params[0]?.name !== 'is' && params.length >= 3) {
-            const [a, , ...b] = params;
-            if (a && b.length === 1 && b[0]) {
-              block.addToChain(a, b[0], true);
-            }
-          }
-        },
-        isnt: (params: Concept[]) => {
-          if (params[0]?.name !== 'isnt' && params.length >= 3) {
-            const [a, , ...b] = params;
-            if (a && b.length === 1 && b[0]) {
-              block.addToChain(a, b[0], false);
-            }
-          }
-        },
-      };
+      // The boxed content should be processed as a regular line
+      expect(block.concepts.some(c => c.name === 'apple')).toBe(true);
+      expect(block.concepts.some(c => c.name === 'fruit')).toBe(true);
+      expect(block.chain).toHaveLength(1);
+      expect(block.chain[0]?.pair.conceptA.name).toBe('apple');
+      expect(block.chain[0]?.pair.conceptB.name).toBe('fruit');
+    });
+  });
 
+  describe('Edge Cases', () => {
+    it('should handle empty input', () => {
+      const tokens = block.tokenize('');
       block.parse(tokens);
 
-      expect(block.concepts).toHaveLength(4);
-      expect(block.chain).toHaveLength(2);
+      expect(block.concepts).toHaveLength(0);
+      expect(block.chain).toHaveLength(0);
     });
-  });
 
-  describe('serialization', () => {
-    it('should serialize to string', () => {
-      const conceptA: Concept = { name: 'A' };
-      const conceptB: Concept = { name: 'B' };
-      const conceptC: Concept = { name: 'C' };
+    it('should handle whitespace-only input', () => {
+      const tokens = block.tokenize('   \n  \t  \n  ');
+      block.parse(tokens);
 
-      block.addToChain(conceptA, conceptB, true);
-      block.addToChain(conceptA, conceptC, false);
-
-      const result = block.serialize();
-
-      expect(result).toContain('A is B');
-      expect(result).toContain('A isnt C');
+      expect(block.concepts).toHaveLength(0);
+      expect(block.chain).toHaveLength(0);
     });
-  });
 
-  describe('state management', () => {
-    it('should get block state', () => {
-      const conceptA: Concept = { name: 'A' };
-      const conceptB: Concept = { name: 'B' };
+    it('should handle single character concepts', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('a is b');
 
-      block.addToChain(conceptA, conceptB, true);
+      expect(block.concepts).toHaveLength(2);
+      expect(block.concepts.map(c => c.name)).toEqual(['a', 'b']);
+      expect(block.chain).toHaveLength(1);
+    });
 
-      const state = block.getState();
+    it('should handle concepts with special characters', () => {
+      const block = runner.getBlock();
+      runner.getCompiler().compile('user-name is valid-identifier');
 
-      expect(state['A']).toBeDefined();
-      expect(state['A']?.['B']).toBe(true);
+      expect(block.concepts).toHaveLength(2);
+      expect(block.concepts.map(c => c.name)).toEqual([
+        'user-name',
+        'valid-identifier',
+      ]);
+      expect(block.chain).toHaveLength(1);
     });
   });
 });

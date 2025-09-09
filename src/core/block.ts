@@ -251,9 +251,10 @@ export class Block {
       }
     }
 
-    // If no hooks were triggered, add the first concept to the chain
-    if (line.length > 0 && line[0]) {
-      return this.addConcept(line[0]);
+    // If no hooks were triggered, add all concepts to the chain
+    if (line.length > 0) {
+      line.forEach(concept => this.addConcept(concept));
+      return line[0];
     }
 
     return undefined;
@@ -281,13 +282,13 @@ export class Block {
   }
 
   /**
-   * Tokenize a raw string into concept lines with labeled block support
+   * Tokenize a raw string into concept lines with native block support
+   * This method handles both single-line commands and multi-line blocks natively
    */
   tokenize(raw: string): Concept[][] {
-    const lines = raw.trim().split('\n');
+    const lines = raw.split('\n');
     const result: Concept[][] = [];
     let currentBlock: Concept[] | null = null;
-    let blockLabel: string | null = null;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -299,7 +300,20 @@ export class Block {
       // Calculate indentation level (count leading spaces/tabs)
       const indent = line.length - line.trimStart().length;
 
-      // Parse the line into concepts
+      // Handle indented content first - don't split into concepts
+      if (indent > 0) {
+        if (currentBlock) {
+          // Add this entire line as a single concept to the current block
+          currentBlock.push({ name: trimmedLine });
+        } else {
+          // This is indented content without a preceding command
+          // Treat it as a standalone indented line - return as single concept
+          result.push([{ name: trimmedLine }]);
+        }
+        continue;
+      }
+
+      // Parse the line into concepts (only for non-indented content)
       const concepts = trimmedLine
         .split(' ')
         .map(str => ({ name: str }) as Concept)
@@ -307,23 +321,8 @@ export class Block {
 
       if (concepts.length === 0) continue;
 
-      // Check if this is a labeled block start (concept name followed by "is")
-      if (
-        indent === 0 &&
-        concepts.length >= 2 &&
-        concepts[1] &&
-        concepts[1].name === 'is' &&
-        concepts[0]
-      ) {
-        // This is a labeled block start
-        blockLabel = concepts[0].name;
-        currentBlock = [];
-        result.push(concepts); // Add the label line to result
-        continue;
-      }
-
-      // Check if this is a command that might have a block (like "db create users")
-      if (indent === 0 && concepts.length >= 2) {
+      // Check if this is a command that might have a block (only if next line is indented)
+      if (indent === 0 && concepts.length >= 1) {
         // Check if the next line is indented (indicating a block)
         const nextLineIndex = i + 1;
         if (nextLineIndex < lines.length) {
@@ -332,87 +331,66 @@ export class Block {
             const nextIndent = nextLine.length - nextLine.trimStart().length;
             if (nextIndent > 0) {
               // This command has a block - start collecting it
-              blockLabel = concepts[0]?.name || null; // Use the first concept as the block label
               currentBlock = [];
-              // Add the command part (first 3 concepts: db create users) to result
-              result.push(concepts.slice(0, 3));
+              // Add the command concepts to result
+              result.push(concepts);
               continue;
             }
           }
         }
       }
 
-      // Handle indented content within a block
-      if (indent > 0 && currentBlock !== null) {
-        // Add this line to the current block
-        currentBlock.push(...concepts);
-        continue;
-      }
-
-      // Regular line (no indentation or no active block)
-      if (currentBlock !== null) {
-        // End the current block and attach it to the last result line
-        const lastLine = result[result.length - 1];
-        if (lastLine && lastLine[0] && lastLine[0].name === blockLabel) {
-          // Attach the block to the label line
-          lastLine.push(...currentBlock);
-        }
+      // Regular non-indented line
+      if (currentBlock) {
+        // End of block - add the collected block content
+        result.push(currentBlock);
         currentBlock = null;
-        blockLabel = null;
       }
 
-      // Add regular line
       result.push(concepts);
     }
 
-    // Handle case where file ends with an active block
-    if (currentBlock !== null) {
-      const lastLine = result[result.length - 1];
-      if (lastLine && lastLine[0] && lastLine[0].name === blockLabel) {
-        lastLine.push(...currentBlock);
-      }
+    // Handle any remaining block content
+    if (currentBlock) {
+      result.push(currentBlock);
     }
 
     return result;
   }
 
   /**
-   * Parse tokenized concepts
+   * Parse tokenized concepts with native block support
    */
   parse(tokens: Concept[][]): void {
     for (const line of tokens) {
-      // Check if this line has a labeled block
-      if (line.length >= 2 && line[1] && line[1].name === 'is' && line[0]) {
-        // This is a labeled block - store it for later use
-        const blockLabel = line[0];
-        const blockContent = line.slice(2).filter(c => c !== undefined); // Everything after "concept is"
+      // Check if this line has block content (indented content)
+      if (this.hasCommandBlock(line)) {
+        // This line has block content - process it as a block
+        const blockContent = this.extractBlockContent(line);
 
-        // Store the labeled block for plugins to use
-        this.storeLabeledBlock(blockLabel.name, blockContent);
+        // Create a boxed concept for the indented content
+        if (blockContent.length > 0) {
+          const boxedConcept: Concept = {
+            name: blockContent.map(c => c.name).join(' '),
+            block: blockContent,
+          };
 
-        // Don't process the label line through hooks - it's just a label
-        this.addConcept(blockLabel);
-      } else if (this.hasCommandBlock(line)) {
-        // This is a command with a block - the block content is already attached
-        const commandConcepts = this.extractCommandConcepts(line);
-        const blockContent = this.extractBlockContent(line.slice(2)); // Everything after the command
+          // Add the boxed concept
+          this.addConcept(boxedConcept);
+        }
 
-        // Process the command with the block content as waiting concepts
-        this.parseLineWithBlock(commandConcepts, blockContent);
+        // Process the block content line by line
+        // Group the block content into relationship lines (split by 'is' commands)
+        const lines = this.groupConceptsIntoRelationshipLines(blockContent);
+        for (const line of lines) {
+          this.parseLine(line);
+        }
       } else {
-        // Regular line
+        // Regular line - process normally
         this.parseLine(line);
       }
       this.inferMissingPairs();
     }
-  }
-
-  private storeLabeledBlock(label: string, content: Concept[]): void {
-    // Store labeled blocks for plugins to access
-    if (!this._labeledBlocks) {
-      this._labeledBlocks = new Map();
-    }
-    this._labeledBlocks.set(label, content);
   }
 
   getLabeledBlock(label: string): Concept[] | undefined {
@@ -420,28 +398,32 @@ export class Block {
   }
 
   private hasCommandBlock(line: Concept[]): boolean {
-    // Check if this line has block content (more than just the command)
-    // A command block has the command concepts followed by block content
-    return line.length > 2 && this.hasBlockContent(line);
-  }
-
-  private hasBlockContent(line: Concept[]): boolean {
-    // Look for patterns that indicate block content
-    // For now, we'll assume any line with more than 2 concepts might have block content
-    // This is a simple heuristic - we could make it more sophisticated
-    return line.length > 2;
-  }
-
-  private extractCommandConcepts(line: Concept[]): Concept[] {
-    // The command concepts are already separated in the tokenize method
-    // They should be the first 2 concepts (e.g., "db create")
-    return line;
+    // Check if this line has block content (indented content)
+    // This can be either:
+    // 1. A single concept with spaces (e.g., [{ name: "a is b" }])
+    // 2. Multiple concepts that were indented (e.g., [{ name: "e is a" }, { name: "f is b" }])
+    return (
+      (line.length === 1 && line[0]?.name?.includes(' ') === true) ||
+      (line.length > 1 && line.every(c => c.name.includes(' ')))
+    );
   }
 
   private extractBlockContent(line: Concept[]): Concept[] {
-    // The block content is passed separately from the command
-    // This method is called with the block content directly
-    return line;
+    // For indented content, we need to split each concept back into individual concepts
+    const result: Concept[] = [];
+    for (const concept of line) {
+      if (concept.name.includes(' ')) {
+        // Split the concept into individual concepts
+        const splitConcepts = concept.name
+          .split(' ')
+          .map(str => ({ name: str }) as Concept)
+          .filter(c => c.name !== '');
+        result.push(...splitConcepts);
+      } else {
+        result.push(concept);
+      }
+    }
+    return result;
   }
 
   /**
@@ -486,6 +468,23 @@ export class Block {
     // Add any remaining concepts as a line
     if (currentLine.length > 0) {
       lines.push(currentLine);
+    }
+
+    return lines;
+  }
+
+  /**
+   * Group concepts into relationship lines (split by 'is' commands)
+   */
+  private groupConceptsIntoRelationshipLines(concepts: Concept[]): Concept[][] {
+    const lines: Concept[][] = [];
+
+    // Group concepts into groups of 3 (A is B)
+    for (let i = 0; i < concepts.length; i += 3) {
+      const line = concepts.slice(i, i + 3);
+      if (line.length === 3) {
+        lines.push(line);
+      }
     }
 
     return lines;
@@ -539,9 +538,8 @@ export class Block {
    * Generate a unique key for a pair
    */
   private _getPairKey(conceptA: Concept, conceptB: Concept): string {
-    // Ensure consistent ordering for pairs
-    const [first, second] = [conceptA.name, conceptB.name].sort();
-    return `${first}:${second}`;
+    // Keep the original order to distinguish between a is c and c is a
+    return `${conceptA.name}:${conceptB.name}`;
   }
 
   /**

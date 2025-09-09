@@ -4,6 +4,7 @@
 
 export interface Concept {
   readonly name: string;
+  readonly block?: Concept[]; // For boxed concepts that contain blocks
 }
 
 export interface Pair {

@@ -1,0 +1,20 @@
+# Error Testing Example
+# This file tests error handling and edge cases
+
+# Valid concepts
+valid_concept is working
+
+# Test invalid commands (these should show errors)
+# print "This should fail - print command removed"
+# echo "This should fail - echo command removed"
+
+# Test unknown commands
+unknown_command test
+
+# Test malformed relationships
+malformed is
+incomplete
+
+# Test valid commands
+say "Error testing completed"
+inspect valid_concept
