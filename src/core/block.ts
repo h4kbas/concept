@@ -165,9 +165,17 @@ export class Block {
   /**
    * Add a relationship to the chain (convenience method)
    */
-  addToChain(conceptA: Concept, conceptB: Concept, relation: boolean): void {
+  addToChain(
+    conceptA: Concept,
+    conceptB: Concept,
+    relation: boolean,
+    relationshipType?: string
+  ): void {
     const pair = this.addPair(conceptA, conceptB);
-    this.addData(pair, relation);
+    const data: Data = relationshipType
+      ? { pair, value: relation, relationshipType }
+      : { pair, value: relation };
+    this.addData(data);
   }
 
   /**
@@ -209,6 +217,20 @@ export class Block {
 
         // Only infer if we have a definitive state for the dependent pair
         if (dependentPairState !== null) {
+          // Check if the dependent pair is a 'has' relationship
+          const dependentPairData = this.chain.find(
+            data =>
+              data.pair.conceptA.name === dependentPair.conceptA.name &&
+              data.pair.conceptB.name === dependentPair.conceptB.name
+          );
+
+          // Skip inference for 'has' relationships to avoid unwanted transitive inference
+          // But allow inference for property instances (concepts ending with '_of_')
+          if (dependentPairData?.relationshipType === 'has' && 
+              !dependentPair.conceptA.name.includes('_of_')) {
+            continue;
+          }
+
           const inferredValue =
             currentPairState === true
               ? dependentPairState

@@ -1,0 +1,47 @@
+# Property Inheritance Example
+# This file demonstrates how property instances inherit from their types
+
+# Define a base property type
+vehicle has engine
+vehicle has wheels
+vehicle has color
+
+# Create specific vehicles
+car has engine
+car has wheels
+car has color
+
+truck has engine
+truck has wheels
+truck has color
+
+motorcycle has engine
+motorcycle has wheels
+motorcycle has color
+
+# Define property types and default values
+engine is v8
+wheels is four
+color is blue
+
+# Modify instances independently
+engine_of_car is v6
+wheels_of_car is four
+color_of_car is red
+
+engine_of_truck is diesel
+wheels_of_truck is six
+color_of_truck is white
+
+engine_of_motorcycle is inline4
+wheels_of_motorcycle is two
+color_of_motorcycle is black
+
+# Inspect the inheritance structure
+inspect vehicle
+inspect car
+inspect truck
+inspect motorcycle
+inspect engine_of_car
+inspect engine_of_truck
+inspect engine_of_motorcycle

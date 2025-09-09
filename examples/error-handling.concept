@@ -1,0 +1,37 @@
+# Error Handling Example
+# This file demonstrates error handling in the has/of relationship system
+
+# Create some objects with properties
+person has name
+person has age
+person has email
+
+# Define property types
+name is string
+age is number
+email is string
+
+# Create property instances and modify them
+name_of_person is John
+age_of_person is 25
+email_of_person is john@example.com
+
+# Inspect the results
+inspect person
+inspect name_of_person
+inspect age_of_person
+inspect email_of_person
+
+# Test with multiple objects
+student has name
+student has age
+student has grade
+
+name_of_student is Alice
+age_of_student is 20
+grade_of_student is A
+
+inspect student
+inspect name_of_student
+inspect age_of_student
+inspect grade_of_student

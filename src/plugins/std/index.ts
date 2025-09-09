@@ -1,4 +1,4 @@
-import { Concept, HookMap } from '../../types';
+import { Concept, HookMap, Data } from '../../types';
 import { ConceptPlugin } from '../../types/plugin';
 import { Block } from '../../core/block';
 
@@ -47,7 +47,8 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
             data =>
               data.pair.conceptA.name === a.name &&
               data.pair.conceptB.name === b.name &&
-              data.value === true
+              data.value === true &&
+              data.relationshipType === 'is'
           );
 
           // If there are more parameters after the relationship, execute them as a command
@@ -172,11 +173,11 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
         // If it looks like a relationship (A isnt B), create it
         const [a, relation, b] = statement;
         if (relation?.name === 'is' && b && a) {
-          block.addToChain(a, b, true);
+          block.addToChain(a, b, true, 'is');
           return;
         }
         if (relation?.name === 'isnt' && b && a) {
-          block.addToChain(a, b, false);
+          block.addToChain(a, b, false, 'isnt');
           return;
         }
       }
@@ -211,6 +212,189 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
         block.addToChain(a, b, false);
         return;
       }
+    }
+
+    // Handle incomplete relationships (just add concepts)
+    if (params.length < 3) {
+      params.forEach(concept => {
+        block.addConcept(concept);
+      });
+      return;
+    }
+  },
+
+  has: (params: Concept[]): Concept[] | void => {
+    const block = getBlock();
+
+    // Handle "has A B" query - check if A has B
+    if (params.length >= 3 && params[0]?.name === 'has') {
+      const [query, a, b] = params;
+      if (query?.name === 'has' && a && b) {
+        // Check if the relationship exists
+        const hasRelationship = block.chain.find(
+          data =>
+            data.pair.conceptA.name === a.name &&
+            data.pair.conceptB.name === b.name &&
+            data.relationshipType === 'has' &&
+            data.value === true
+        );
+
+        if (hasRelationship) {
+          console.log(`✅ ${a.name} has ${b.name}`);
+          return [];
+        } else {
+          console.log(`❌ ${a.name} does not have ${b.name}`);
+          return [];
+        }
+      }
+    }
+
+    // Handle "A has B" relationship - creates a property relationship
+    if (params.length >= 3 && params[1]?.name === 'has') {
+      const [a, relation, b] = params;
+      if (relation?.name === 'has' && b && a) {
+        // Create the has relationship: A has B
+        block.addToChain(a, b, true, 'has');
+
+        // Add the property concept to the block so it can be referenced
+        block.addConcept(b);
+
+        // Automatically create property instance: property_of_object
+        const propertyInstanceName = `${b.name}_of_${a.name}`;
+        block.addConcept({ name: propertyInstanceName });
+
+        // Create relationship: instance is property
+        block.addPair({ conceptA: { name: propertyInstanceName }, conceptB: { name: b.name } });
+        block.addData({ pair: { conceptA: { name: propertyInstanceName }, conceptB: { name: b.name } }, value: true, relationshipType: 'is' } as Data);
+
+        // Create relationship: main concept has instance
+        block.addPair({ conceptA: { name: a.name }, conceptB: { name: propertyInstanceName } });
+        block.addData({ pair: { conceptA: { name: a.name }, conceptB: { name: propertyInstanceName } }, value: true, relationshipType: 'has' } as Data);
+
+        return;
+      }
+    }
+
+    // Handle "has <statement>" - evaluate whatever comes after 'has'
+    if (params[0]?.name === 'has') {
+      // Handle "has <statement>" - evaluate whatever comes after 'has'
+      if (params.length < 2) {
+        throw new Error('Invalid "has" usage: has <statement>');
+      }
+
+      // Extract everything after 'has' and evaluate it as a concept statement
+      const statement = params.slice(1);
+      if (statement.length >= 2) {
+        // If it looks like a relationship (A has B), create it
+        const [a, relation, b] = statement;
+        if (relation?.name === 'has' && b && a) {
+          block.addToChain(a, b, true, 'has');
+          return;
+        }
+        if (relation?.name === 'is' && b && a) {
+          block.addToChain(a, b, true, 'is');
+          return;
+        }
+      }
+
+      // Check if the first concept is a command (has a hook)
+      const firstConcept = statement[0];
+      if (
+        firstConcept &&
+        block['_hookMap'] &&
+        block['_hookMap'][firstConcept.name]
+      ) {
+        // Execute the command with the remaining parameters
+        const hook = block['_hookMap'][firstConcept.name];
+        if (hook) {
+          return hook(statement);
+        }
+      }
+
+      // Otherwise, just add the concepts
+      statement.forEach(concept => {
+        block.addConcept(concept);
+      });
+      return;
+    }
+
+    // Handle incomplete relationships (just add concepts)
+    if (params.length < 3) {
+      params.forEach(concept => {
+        block.addConcept(concept);
+      });
+      return;
+    }
+  },
+
+  hasnt: (params: Concept[]): Concept[] | void => {
+    const block = getBlock();
+
+    // Handle "hasnt A B" query - check if A does not have B
+    if (params.length >= 3 && params[0]?.name === 'hasnt') {
+      const [query, a, b] = params;
+      if (query?.name === 'hasnt' && a && b) {
+        // Check if the relationship exists
+        const hasRelationship = block.chain.find(
+          data =>
+            data.pair.conceptA.name === a.name &&
+            data.pair.conceptB.name === b.name &&
+            data.relationshipType === 'has' &&
+            data.value === true
+        );
+
+        if (hasRelationship) {
+          console.log(`❌ ${a.name} has ${b.name} (expected not to have)`);
+          return [];
+        } else {
+          console.log(`✅ ${a.name} does not have ${b.name}`);
+          return [];
+        }
+      }
+    }
+
+    // Handle "A hasnt B" relationship - creates a negative property relationship
+    if (params.length >= 3 && params[1]?.name === 'hasnt') {
+      const [a, relation, b] = params;
+      if (relation?.name === 'hasnt' && b && a) {
+        // Create the negative has relationship: A hasnt B
+        block.addToChain(a, b, false, 'has');
+
+        // Add the property concept to the block so it can be referenced
+        block.addConcept(b);
+
+        return;
+      }
+    }
+
+    // Handle "hasnt <statement>" - evaluate whatever comes after 'hasnt'
+    if (params[0]?.name === 'hasnt') {
+      if (params.length < 2) {
+        throw new Error('Invalid "hasnt" usage: hasnt <statement>');
+      }
+
+      // Extract everything after 'hasnt' and evaluate it as a concept statement
+      const statement = params.slice(1);
+
+      // Check if the first concept is a command (has a hook)
+      const firstConcept = statement[0];
+      if (
+        firstConcept &&
+        block['_hookMap'] &&
+        block['_hookMap'][firstConcept.name]
+      ) {
+        // Execute the command with the remaining parameters
+        const hook = block['_hookMap'][firstConcept.name];
+        if (hook) {
+          return hook(statement);
+        }
+      }
+
+      // Otherwise, just add the concepts
+      statement.forEach(concept => {
+        block.addConcept(concept);
+      });
+      return;
     }
 
     // Handle incomplete relationships (just add concepts)
@@ -264,22 +448,17 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
     for (const otherConcept of allConcepts) {
       if (otherConcept.name === conceptName) continue;
 
-      const pairState = block.blockExplorer.calculateCurrentPairState({
-        conceptA: concept,
-        conceptB: otherConcept,
-      });
+      // Find the actual relationship data to get the relationship type
+      const relationshipData = block.chain.find(
+        data =>
+          data.pair.conceptA.name === concept.name &&
+          data.pair.conceptB.name === otherConcept.name
+      );
 
-      if (pairState === true) {
+      if (relationshipData) {
         allRelationships.push({
           concept: conceptName,
-          relation: 'is',
-          target: otherConcept.name,
-          isInferred: false,
-        });
-      } else if (pairState === false) {
-        allRelationships.push({
-          concept: conceptName,
-          relation: 'isnt',
+          relation: relationshipData.relationshipType || 'is',
           target: otherConcept.name,
           isInferred: false,
         });
@@ -290,22 +469,17 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
     for (const otherConcept of allConcepts) {
       if (otherConcept.name === conceptName) continue;
 
-      const pairState = block.blockExplorer.calculateCurrentPairState({
-        conceptA: otherConcept,
-        conceptB: concept,
-      });
+      // Find the actual relationship data to get the relationship type
+      const relationshipData = block.chain.find(
+        data =>
+          data.pair.conceptA.name === otherConcept.name &&
+          data.pair.conceptB.name === concept.name
+      );
 
-      if (pairState === true) {
+      if (relationshipData) {
         allRelationships.push({
           concept: otherConcept.name,
-          relation: 'is',
-          target: conceptName,
-          isInferred: false,
-        });
-      } else if (pairState === false) {
-        allRelationships.push({
-          concept: otherConcept.name,
-          relation: 'isnt',
+          relation: relationshipData.relationshipType || 'is',
           target: conceptName,
           isInferred: false,
         });
@@ -317,7 +491,12 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
     if (allRelationships.length > 0) {
       console.log('\nRelationships:');
       allRelationships.forEach(rel => {
-        const relationColor = rel.relation === 'is' ? '\x1b[32m' : '\x1b[31m'; // Green for 'is', red for 'isnt'
+        let relationColor = '\x1b[32m'; // Default green
+        if (rel.relation === 'isnt') {
+          relationColor = '\x1b[31m'; // Red for 'isnt'
+        } else if (rel.relation === 'has') {
+          relationColor = '\x1b[33m'; // Yellow for 'has'
+        }
         console.log(
           `  \x1b[34m${rel.concept}\x1b[0m ${relationColor}${rel.relation}\x1b[0m \x1b[34m${rel.target}\x1b[0m`
         );

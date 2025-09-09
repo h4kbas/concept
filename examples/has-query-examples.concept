@@ -1,0 +1,54 @@
+# Has Query Examples
+# This file demonstrates the new has/hasnt query functionality
+
+# Create some objects with properties
+apple has color
+apple has size
+apple has taste
+
+banana has color
+banana has size
+banana hasnt taste
+
+car has engine
+car has wheels
+car has doors
+
+truck has engine
+truck has wheels
+truck hasnt doors
+
+# Query existing properties
+has apple color
+has apple size
+has apple taste
+
+has banana color
+has banana size
+has banana taste
+
+has car engine
+has car wheels
+has car doors
+
+has truck engine
+has truck wheels
+has truck doors
+
+# Query non-existent properties
+has apple weight
+has banana weight
+has car roof
+has truck roof
+
+# Query negative relationships
+hasnt apple weight
+hasnt banana weight
+hasnt car roof
+hasnt truck roof
+
+# Query mixed scenarios
+hasnt apple taste
+hasnt banana taste
+hasnt car doors
+hasnt truck doors

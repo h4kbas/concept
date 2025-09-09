@@ -54,17 +54,24 @@ These hooked concepts can produce various effects in the program and interact wi
 
 ### Relationships
 
-The core of Concept is its relationship system. Relationships are expressed using two main operators:
+The core of Concept is its relationship system. Relationships are expressed using four main operators:
 
-- **`is`**: Creates a positive relationship (A is B)
-- **`isnt`**: Creates a negative relationship (A isnt B)
+- **`is`**: Creates a positive type/value relationship (A is B)
+- **`isnt`**: Creates a negative type/value relationship (A isnt B)
+- **`has`**: Creates a property ownership relationship (A has B)
+- **`hasnt`**: Creates a negative property ownership relationship (A hasnt B)
 
 Relationships are:
 
 - **Directional**: A is B is different from B is A
 - **Non-exclusive**: Multiple relationships can coexist (A can be both B and not C)
 - **Queryable**: You can query the current state of any relationship
-- **Inferable**: The system can infer new relationships from existing ones
+- **Inferable**: The system can infer new relationships from existing ones (except for `has` relationships)
+
+#### Relationship Types
+
+- **Type/Value Relationships (`is`/`isnt`)**: Used for classification and values, with transitive inference
+- **Property Relationships (`has`/`hasnt`)**: Used for object properties, without transitive inference
 
 ### Plugins
 
@@ -179,6 +186,28 @@ user is
   role is admin
 ```
 
+### Property Relationships
+
+```concept
+# Create objects with properties
+apple has color
+apple has size
+banana has color
+banana hasnt taste
+
+# Access property instances directly
+color_of_apple is green
+size_of_apple is medium
+color_of_banana is yellow
+size_of_banana is large
+
+# Query property relationships
+has apple color
+hasnt apple weight
+has banana color
+hasnt banana taste
+```
+
 ### Interactive Commands
 
 ```concept
@@ -231,24 +260,57 @@ apple isnt fruit
 
 #### Querying Relationships
 
-You can query relationships using the "is a b" syntax and inspect them in the REPL:
+You can query relationships using various syntax patterns and inspect them in the REPL:
 
 ```concept
-# Query if a relationship exists
+# Query type/value relationships
 is cat mammal
 is mammal animal
 is cat animal  # This will show true due to inference
 
-# Query negative relationships
+# Query negative type/value relationships
 isnt cat vegetable
 isnt mammal plant
+
+# Query property relationships
+has apple color
+has apple size
+hasnt apple weight
+
+# Query negative property relationships
+hasnt banana taste
+hasnt car roof
 
 # Combine queries with actions
 is cat mammal say Cats are mammals
 is cat animal say Cats are animals too
 isnt cat vegetable say Cats are definitely not vegetables
+has apple color say Apples have color
+hasnt apple weight say Apples don't have weight
 ```
 
 ## Plugins
 
-Plugins can hook different concepts in different environments and can enable language perfom various tasks.
+Plugins can hook different concepts in different environments and can enable language perform various tasks.
+
+### File Plugin
+
+The file plugin demonstrates integration with the `has` relationship system:
+
+```concept
+# Read a file and create a concept with metadata
+file read package.json as packageInfo
+
+# Access file metadata properties
+filename_of_packageInfo
+type_of_packageInfo
+size_of_packageInfo
+extension_of_packageInfo
+
+# Query file properties
+has packageInfo filename
+has packageInfo type
+hasnt packageInfo author
+```
+
+The file plugin automatically creates property instances for file metadata, allowing you to work with file information as first-class concepts in the language.

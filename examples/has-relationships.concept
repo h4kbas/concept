@@ -1,0 +1,33 @@
+# Has Relationships Example
+# This file demonstrates the new 'has' relationship system for properties
+
+# Create objects with properties
+apple has color
+apple has size
+apple has taste
+
+banana has color
+banana has size
+banana has taste
+
+# Define property types and values
+color is red
+size is small
+taste is sweet
+
+# Modify property instances independently
+color_of_apple is green
+size_of_apple is medium
+taste_of_apple is sour
+
+color_of_banana is yellow
+size_of_banana is large
+taste_of_banana is sweet
+
+# Inspect the results
+inspect apple
+inspect banana
+inspect color_of_apple
+inspect color_of_banana
+inspect size_of_apple
+inspect size_of_banana

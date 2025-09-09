@@ -1,0 +1,18 @@
+file read package.json as packageInfo
+filename_of_packageInfo
+type_of_packageInfo
+size_of_packageInfo
+extension_of_packageInfo
+inspect packageInfo
+inspect filename_of_packageInfo
+inspect type_of_packageInfo
+inspect size_of_packageInfo
+inspect extension_of_packageInfo
+file read README.md as readmeInfo
+filename_of_readmeInfo
+type_of_readmeInfo
+size_of_readmeInfo
+extension_of_readmeInfo
+inspect readmeInfo
+inspect filename_of_readmeInfo
+inspect type_of_readmeInfo

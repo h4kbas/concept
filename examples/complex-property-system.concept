@@ -1,0 +1,80 @@
+# Complex Property System Example
+# This file demonstrates advanced usage of the has/of relationship system
+
+# Define a hierarchical property system
+company has employees
+company has departments
+company has location
+
+department has employees
+department has budget
+department has manager
+
+employee has name
+employee has salary
+employee has position
+employee has department
+
+# Create instances
+techCorp has employees
+techCorp has departments
+techCorp has location
+
+engineering has employees
+engineering has budget
+engineering has manager
+
+marketing has employees
+marketing has budget
+marketing has manager
+
+# Define property types
+employees is list
+departments is list
+location is string
+budget is number
+manager is person
+name is string
+salary is number
+position is string
+
+# Set values for property instances
+location_of_techCorp is San Francisco
+budget_of_engineering is 1000000
+budget_of_marketing is 500000
+manager_of_engineering is Alice
+manager_of_marketing is Bob
+
+# Create employee instances
+alice has name
+alice has salary
+alice has position
+alice has department
+
+bob has name
+bob has salary
+bob has position
+bob has department
+
+# Set employee values
+name_of_alice is Alice Smith
+salary_of_alice is 120000
+position_of_alice is Senior Engineer
+department_of_alice is engineering
+
+name_of_bob is Bob Johnson
+salary_of_bob is 80000
+position_of_bob is Marketing Manager
+department_of_bob is marketing
+
+# Inspect the complex structure
+inspect techCorp
+inspect engineering
+inspect marketing
+inspect alice
+inspect bob
+inspect location_of_techCorp
+inspect budget_of_engineering
+inspect budget_of_marketing
+inspect name_of_alice
+inspect name_of_bob

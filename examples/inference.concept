@@ -1,0 +1,25 @@
+# Inference Test Example
+# This file tests the automatic inference system
+
+# Basic inference setup
+mammal is animal
+dog is mammal
+cat is mammal
+
+# These should trigger inference
+# If dog is mammal and mammal is animal, then dog is animal (should be inferred)
+# If cat is mammal and mammal is animal, then cat is animal (should be inferred)
+
+# Test what we can infer
+say "Testing inference system..."
+inspect dog
+inspect cat
+inspect mammal
+inspect animal
+
+# Test negative inference
+bird is animal
+bird isnt mammal
+
+# This should infer: if bird isnt mammal and dog is mammal, then bird isnt dog
+inspect bird

@@ -558,13 +558,8 @@ program
 
         // Process single-line commands normally
         if (!inBlock && trimmed !== '') {
-          console.log(
-            'DEBUG: Processing single-line command, currentInput:',
-            currentInput
-          );
           // First, process any pending block if we have one
           if (currentInput.trim() !== '') {
-            console.log('DEBUG: Processing pending block:', currentInput);
             try {
               compiler.compile(currentInput);
             } catch (error) {
