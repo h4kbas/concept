@@ -25,22 +25,6 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
 
   is: (params: Concept[]): Concept[] | void => {
     const block = getBlock();
-    // Handle "A is B" relationships
-    if (params.length === 3) {
-      const [a, isToken, b] = params;
-      if (a && isToken?.name === 'is' && b) {
-        block.addToChain(a, b, true);
-        return;
-      }
-    }
-
-    // Handle incomplete relationships (just add concepts)
-    if (params.length < 3) {
-      params.forEach(concept => {
-        block.addConcept(concept);
-      });
-      return;
-    }
 
     // Handle "is <statement>" - evaluate whatever comes after 'is'
     if (params[0]?.name === 'is') {
@@ -150,15 +134,15 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
         block.addConcept(concept);
       });
     }
-  },
 
-  isnt: (params: Concept[]): Concept[] | void => {
-    const block = getBlock();
-    // Handle "A isnt B" relationships
+    // Handle "A is B" relationships
     if (params.length === 3) {
-      const [a, isntToken, b] = params;
-      if (a && isntToken?.name === 'isnt' && b) {
-        block.addToChain(a, b, false);
+      const [a, isToken, b] = params;
+      if (a && isToken?.name === 'is' && b) {
+        // Add all concepts to the block
+        params.forEach(concept => block.addConcept(concept));
+        // Create the relationship
+        block.addToChain(a, b, true);
         return;
       }
     }
@@ -170,6 +154,10 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
       });
       return;
     }
+  },
+
+  isnt: (params: Concept[]): Concept[] | void => {
+    const block = getBlock();
 
     // Handle "isnt <statement>" - evaluate whatever comes after 'isnt'
     if (params[0]?.name === 'isnt') {
@@ -212,6 +200,26 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
         block.addConcept(concept);
       });
     }
+
+    // Handle "A isnt B" relationships
+    if (params.length === 3) {
+      const [a, isntToken, b] = params;
+      if (a && isntToken?.name === 'isnt' && b) {
+        // Add all concepts to the block
+        params.forEach(concept => block.addConcept(concept));
+        // Create the relationship
+        block.addToChain(a, b, false);
+        return;
+      }
+    }
+
+    // Handle incomplete relationships (just add concepts)
+    if (params.length < 3) {
+      params.forEach(concept => {
+        block.addConcept(concept);
+      });
+      return;
+    }
   },
 
   inspect: (params: Concept[]): Concept[] | void => {
@@ -243,35 +251,15 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
       });
     }
 
-    // Get all relationships involving this concept
-    const relationships = block.chain.filter(
-      data =>
-        data.pair.conceptA.name === conceptName ||
-        data.pair.conceptB.name === conceptName
-    );
-
-    console.log(`Relationships: ${relationships.length}`);
-
-    if (relationships.length > 0) {
-      console.log('\nDirect Relationships:');
-      relationships.forEach(data => {
-        const relation = data.value ? 'is' : 'isnt';
-        const relationColor = data.value ? '\x1b[32m' : '\x1b[31m'; // Green for 'is', red for 'isnt'
-        if (data.pair.conceptA.name === conceptName) {
-          console.log(
-            `  \x1b[34m${conceptName}\x1b[0m ${relationColor}${relation}\x1b[0m \x1b[34m${data.pair.conceptB.name}\x1b[0m`
-          );
-        } else {
-          console.log(
-            `  \x1b[34m${data.pair.conceptA.name}\x1b[0m ${relationColor}${relation}\x1b[0m \x1b[34m${conceptName}\x1b[0m`
-          );
-        }
-      });
-    }
-
-    // Get inferred relationships through the block explorer
+    // Get all relationships involving this concept using the block explorer
+    // This gives us the complete, deduplicated view of all relationships
     const allConcepts = block.concepts;
-    const inferredRelationships: string[] = [];
+    const allRelationships: Array<{
+      concept: string;
+      relation: string;
+      target: string;
+      isInferred: boolean;
+    }> = [];
 
     for (const otherConcept of allConcepts) {
       if (otherConcept.name === conceptName) continue;
@@ -282,26 +270,57 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
       });
 
       if (pairState === true) {
-        inferredRelationships.push(`${conceptName} is ${otherConcept.name}`);
+        allRelationships.push({
+          concept: conceptName,
+          relation: 'is',
+          target: otherConcept.name,
+          isInferred: false,
+        });
       } else if (pairState === false) {
-        inferredRelationships.push(`${conceptName} isnt ${otherConcept.name}`);
+        allRelationships.push({
+          concept: conceptName,
+          relation: 'isnt',
+          target: otherConcept.name,
+          isInferred: false,
+        });
       }
     }
 
-    if (inferredRelationships.length > 0) {
-      console.log('\nInferred Relationships:');
-      inferredRelationships.forEach(rel => {
-        // Parse the relationship string to add colors
-        const parts = rel.split(' ');
-        if (parts.length === 3) {
-          const [conceptA, relation, conceptB] = parts;
-          const relationColor = relation === 'is' ? '\x1b[32m' : '\x1b[31m';
-          console.log(
-            `  \x1b[34m${conceptA}\x1b[0m ${relationColor}${relation}\x1b[0m \x1b[34m${conceptB}\x1b[0m \x1b[90m(inferred)\x1b[0m`
-          );
-        } else {
-          console.log(`  ${rel} \x1b[90m(inferred)\x1b[0m`);
-        }
+    // Also check reverse relationships (where this concept is the target)
+    for (const otherConcept of allConcepts) {
+      if (otherConcept.name === conceptName) continue;
+
+      const pairState = block.blockExplorer.calculateCurrentPairState({
+        conceptA: otherConcept,
+        conceptB: concept,
+      });
+
+      if (pairState === true) {
+        allRelationships.push({
+          concept: otherConcept.name,
+          relation: 'is',
+          target: conceptName,
+          isInferred: false,
+        });
+      } else if (pairState === false) {
+        allRelationships.push({
+          concept: otherConcept.name,
+          relation: 'isnt',
+          target: conceptName,
+          isInferred: false,
+        });
+      }
+    }
+
+    console.log(`Relationships: ${allRelationships.length}`);
+
+    if (allRelationships.length > 0) {
+      console.log('\nRelationships:');
+      allRelationships.forEach(rel => {
+        const relationColor = rel.relation === 'is' ? '\x1b[32m' : '\x1b[31m'; // Green for 'is', red for 'isnt'
+        console.log(
+          `  \x1b[34m${rel.concept}\x1b[0m ${relationColor}${rel.relation}\x1b[0m \x1b[34m${rel.target}\x1b[0m`
+        );
       });
     }
 

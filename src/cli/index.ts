@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name('concept')
   .description('Concept language compiler and runtime')
-  .version('1.0.0');
+  .version('2.0.0');
 
 program
   .command('compile')
@@ -66,6 +66,7 @@ program
   .description('Run a Concept language file with optional plugins')
   .argument('<input>', 'Input .concept file')
   .option('--no-infer', 'Disable automatic inference')
+  .option('--disable-std', 'Disable standard library plugin')
   .option('-p, --plugins <plugins...>', 'Plugin paths or names to load')
   .option('-c, --config <file>', 'Configuration file path')
   .option('-w, --watch', 'Watch for file changes')
@@ -80,21 +81,8 @@ program
         process.exit(1);
       }
 
-      // If no plugins specified, use simple compiler
-      if (!options.plugins && !options.config && !options.watch) {
-        const source = readFileSync(inputPath, 'utf-8');
-        const compiler = new Compiler();
-
-        if (!options.infer) {
-          compiler.block['inferMissingPairs'] = () => {};
-        }
-
-        compiler.compile(source);
-        console.log('Execution completed successfully');
-        return;
-      }
-
-      // Use plugin runner for advanced features
+      // Always use plugin runner to get std plugin functionality
+      // Use plugin runner for all features
       const runner = new ConceptRunnerImpl();
 
       // Load configuration
@@ -106,16 +94,41 @@ program
           process.exit(1);
         }
         const configData = JSON.parse(readFileSync(configPath, 'utf-8'));
+
+        // Determine which plugins to load
+        let plugins: string[] = configData.plugins || [];
+
+        // Load std plugin by default unless --disable-std is specified
+        if (
+          !options.disableStd &&
+          !plugins.includes('./dist/plugins/std/index.js')
+        ) {
+          plugins.unshift('./dist/plugins/std/index.js'); // Add std plugin first
+        }
+
         config = {
-          plugins: configData.plugins || [],
+          plugins: plugins,
           watchMode: options.watch || false,
           autoReload: true,
           logLevel: options.logLevel || 'info',
           outputDir: options.outputDir || './output',
         };
       } else {
+        // Determine which plugins to load
+        let plugins: string[] = [];
+
+        // Load std plugin by default unless --disable-std is specified
+        if (!options.disableStd) {
+          plugins.push('./dist/plugins/std/index.js');
+        }
+
+        // Add any additional plugins specified
+        if (options.plugins) {
+          plugins.push(...options.plugins);
+        }
+
         config = {
-          plugins: options.plugins || [],
+          plugins: plugins,
           watchMode: options.watch || false,
           autoReload: true,
           logLevel: options.logLevel || 'info',
@@ -299,6 +312,11 @@ program
       const runner = new ConceptRunnerImpl();
       const allPlugins = [...(options.plugins || [])];
 
+      // Load std plugin by default for REPL
+      if (!allPlugins.includes('./dist/plugins/std/index.js')) {
+        allPlugins.unshift('./dist/plugins/std/index.js');
+      }
+
       const config: RunnerConfig = {
         plugins: allPlugins,
         watchMode: false,
@@ -460,7 +478,6 @@ program
           rl.prompt();
           return;
         }
-
 
         // Handle multi-line input for native blocks
         if (trimmed === '') {

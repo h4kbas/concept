@@ -8,7 +8,7 @@ describe('Core Integration Tests', () => {
   beforeEach(async () => {
     runner = new ConceptRunnerImpl();
     config = {
-      plugins: [],
+      plugins: ['./dist/plugins/std/index.js'],
       logLevel: 'error' as const,
       outputDir: './test-output',
     };
@@ -30,14 +30,14 @@ describe('Core Integration Tests', () => {
 
       // 2. Series of concepts: 'a is b'
       runner.getCompiler().compile('a is b');
-      expect(block.concepts).toHaveLength(2); // a, b (a already exists)
+      expect(block.concepts).toHaveLength(3); // a, is, b
       expect(block.chain).toHaveLength(1);
       expect(block.chain[0]?.pair.conceptA.name).toBe('a');
       expect(block.chain[0]?.pair.conceptB.name).toBe('b');
 
       // 3. Boxed concept: '<tab>a'
       runner.getCompiler().compile('        a');
-      expect(block.concepts).toHaveLength(2); // a, b (a already exists)
+      expect(block.concepts).toHaveLength(3); // a, is, b (a already exists)
       expect(block.concepts.some(c => c.name === 'a')).toBe(true);
 
       // 4. Command with boxed content: 'a is' + '<tab>c is d'
@@ -45,7 +45,7 @@ describe('Core Integration Tests', () => {
         c is d`;
       runner.getCompiler().compile(input);
 
-      expect(block.concepts).toHaveLength(6); // a, b, is, c is d, c, d
+      expect(block.concepts).toHaveLength(6); // a, is, b, c, is, d
       expect(block.concepts.some(c => c.name === 'c is d')).toBe(true);
       expect(block.chain).toHaveLength(2); // a is b + c is d
     });
@@ -120,9 +120,10 @@ describe('Core Integration Tests', () => {
 banana is fruit`;
       runner.getCompiler().compile(input);
 
-      expect(block.concepts).toHaveLength(3);
+      expect(block.concepts).toHaveLength(4); // apple, is, fruit, banana
       expect(block.concepts.map(c => c.name)).toEqual([
         'apple',
+        'is',
         'fruit',
         'banana',
       ]);

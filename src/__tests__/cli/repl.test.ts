@@ -11,7 +11,7 @@ describe('REPL Functionality', () => {
     compiler = new Compiler();
     runner = new ConceptRunnerImpl();
     config = {
-      plugins: [],
+      plugins: ['./dist/plugins/std/index.js'],
       logLevel: 'error' as const,
       outputDir: './test-output',
     };
@@ -33,8 +33,8 @@ describe('REPL Functionality', () => {
     it('should process relationships', () => {
       const block = runner.getBlock();
       runner.getCompiler().compile('apple is fruit');
-      expect(block.concepts).toHaveLength(2);
-      expect(block.concepts.map(c => c.name)).toEqual(['apple', 'fruit']);
+      expect(block.concepts).toHaveLength(3);
+      expect(block.concepts.map(c => c.name)).toEqual(['apple', 'is', 'fruit']);
       expect(block.chain).toHaveLength(1);
     });
 
@@ -92,9 +92,10 @@ describe('REPL Functionality', () => {
       runner.getCompiler().compile('apple is fruit');
       runner.getCompiler().compile('banana is fruit');
 
-      expect(block.concepts).toHaveLength(3);
+      expect(block.concepts).toHaveLength(4);
       expect(block.concepts.map(c => c.name)).toEqual([
         'apple',
+        'is',
         'fruit',
         'banana',
       ]);
@@ -124,8 +125,8 @@ describe('REPL Functionality', () => {
       const block = runner.getBlock();
       runner.getCompiler().compile('a is b');
 
-      expect(block.concepts).toHaveLength(2);
-      expect(block.concepts.map(c => c.name)).toEqual(['a', 'b']);
+      expect(block.concepts).toHaveLength(3);
+      expect(block.concepts.map(c => c.name)).toEqual(['a', 'is', 'b']);
       expect(block.chain).toHaveLength(1);
       expect(block.chain[0]?.pair.conceptA.name).toBe('a');
       expect(block.chain[0]?.pair.conceptB.name).toBe('b');
@@ -135,8 +136,8 @@ describe('REPL Functionality', () => {
       const block = runner.getBlock();
       runner.getCompiler().compile('a isnt b');
 
-      expect(block.concepts).toHaveLength(2);
-      expect(block.concepts.map(c => c.name)).toEqual(['a', 'b']);
+      expect(block.concepts).toHaveLength(3);
+      expect(block.concepts.map(c => c.name)).toEqual(['a', 'isnt', 'b']);
       expect(block.chain).toHaveLength(1);
       expect(block.chain[0]?.value).toBe(false);
     });
@@ -151,19 +152,19 @@ describe('REPL Functionality', () => {
 
       // Relationship
       runner.getCompiler().compile('apple is fruit');
-      expect(block.concepts).toHaveLength(2);
+      expect(block.concepts).toHaveLength(3);
       expect(block.chain).toHaveLength(1);
 
       // Boxed concept
       runner.getCompiler().compile('        banana is fruit');
-      expect(block.concepts).toHaveLength(4); // apple, fruit, banana is fruit, banana
+      expect(block.concepts).toHaveLength(5); // apple, is, fruit, banana is fruit, banana
       expect(block.chain).toHaveLength(2);
 
       // Command with block
       const input = `d is
         e is a`;
       runner.getCompiler().compile(input);
-      expect(block.concepts).toHaveLength(9); // previous + d, is, e is a, e, a
+      expect(block.concepts).toHaveLength(9); // previous + d, is, e is a, e, is, a
       expect(block.chain).toHaveLength(3);
     });
 
@@ -220,7 +221,7 @@ describe('REPL Functionality', () => {
       const block = runner.getBlock();
 
       runnerCompiler.compile('apple is fruit');
-      expect(block.concepts).toHaveLength(2);
+      expect(block.concepts).toHaveLength(3);
       expect(block.chain).toHaveLength(1);
     });
 
@@ -238,8 +239,8 @@ describe('REPL Functionality', () => {
       const block = runner.getBlock();
 
       runnerCompiler.compile('apple is fruit');
-      expect(block.concepts).toHaveLength(2);
-      expect(runnerCompiler.block.concepts).toHaveLength(2);
+      expect(block.concepts).toHaveLength(3);
+      expect(runnerCompiler.block.concepts).toHaveLength(3);
       expect(runner.getBlock()).toBe(runnerCompiler.block);
     });
   });

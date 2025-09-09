@@ -26,19 +26,9 @@ export class ConceptRunnerImpl implements ConceptRunner {
 
     console.log('🚀 Initializing Concept Runner...');
 
-    // Load std plugin by default
-    try {
-      await this.pluginManager.loadPlugin('./dist/plugins/std/index.js');
-    } catch (error) {
-      console.error('Failed to load std plugin:', error);
-      if (config.logLevel === 'debug') {
-        console.error(error);
-      }
-    }
+    console.log(`📦 Loading ${config.plugins.length} plugins...`);
 
-    console.log(`📦 Loading ${config.plugins.length} additional plugins...`);
-
-    // Load all additional plugins
+    // Load all configured plugins
     for (const pluginPath of config.plugins) {
       try {
         await this.pluginManager.loadPlugin(pluginPath);

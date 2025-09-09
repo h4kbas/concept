@@ -24,7 +24,7 @@ describe('ConceptRunner', () => {
 
       await runner.initialize(config);
 
-      expect(runner.getLoadedPlugins()).toHaveLength(1); // std plugin is loaded by default
+      expect(runner.getLoadedPlugins()).toHaveLength(0); // No plugins loaded when explicitly set to empty array
       expect(runner.getCompiler()).toBeDefined();
     });
 
@@ -67,13 +67,14 @@ describe('ConceptRunner', () => {
         const result = await runner.runFile(testFile);
 
         expect(result).toBeDefined();
-        expect(runner.getBlock().concepts).toHaveLength(3);
+        expect(runner.getBlock().concepts).toHaveLength(4); // apple, is, fruit, banana
         expect(runner.getBlock().concepts.map((c: any) => c.name)).toEqual([
           'apple',
+          'is',
           'fruit',
           'banana',
         ]);
-        expect(runner.getBlock().chain).toHaveLength(2);
+        expect(runner.getBlock().chain).toHaveLength(0); // No hooks loaded, so no relationships created
       } finally {
         // Clean up
         if (fs.existsSync(testFile)) {
@@ -163,8 +164,8 @@ describe('ConceptRunner', () => {
       const compiler = runner.getCompiler();
       compiler.compile('apple is fruit');
 
-      expect(runner.getBlock().concepts).toHaveLength(2);
-      expect(runner.getBlock().chain).toHaveLength(1);
+      expect(runner.getBlock().concepts).toHaveLength(3); // apple, is, fruit (but no hooks to create relationships)
+      expect(runner.getBlock().chain).toHaveLength(0); // No hooks loaded, so no relationships created
     });
   });
 
@@ -182,10 +183,9 @@ describe('ConceptRunner', () => {
 
       const compiler = runner.getCompiler();
 
-      // Test that hooks are available
+      // Test that no hooks are available when no plugins are loaded
       expect(compiler.block['_hookMap']).toBeDefined();
-      expect(compiler.block['_hookMap']['say']).toBeDefined();
-      expect(compiler.block['_hookMap']['is']).toBeDefined();
+      expect(Object.keys(compiler.block['_hookMap'])).toEqual([]);
     });
   });
 

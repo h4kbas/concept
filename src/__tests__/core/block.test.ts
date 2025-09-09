@@ -13,7 +13,7 @@ describe('Block', () => {
     block = new Block();
     runner = new ConceptRunnerImpl();
     config = {
-      plugins: [],
+      plugins: ['./dist/plugins/std/index.js'],
       logLevel: 'error' as const,
       outputDir: './test-output',
     };
@@ -165,8 +165,8 @@ orange is fruit`;
       const block = runner.getBlock();
       runner.getCompiler().compile('apple is fruit');
 
-      expect(block.concepts).toHaveLength(2);
-      expect(block.concepts.map(c => c.name)).toEqual(['apple', 'fruit']);
+      expect(block.concepts).toHaveLength(3);
+      expect(block.concepts.map(c => c.name)).toEqual(['apple', 'is', 'fruit']);
       expect(block.chain).toHaveLength(1);
       expect(block.chain[0]?.pair.conceptA.name).toBe('apple');
       expect(block.chain[0]?.pair.conceptB.name).toBe('fruit');
@@ -176,9 +176,10 @@ orange is fruit`;
       const block = runner.getBlock();
       runner.getCompiler().compile('        apple is fruit');
 
-      expect(block.concepts).toHaveLength(3); // apple, fruit, and the boxed concept
+      expect(block.concepts).toHaveLength(4); // apple, is, fruit, and the boxed concept
       expect(block.concepts.some(c => c.name === 'apple is fruit')).toBe(true);
       expect(block.concepts.some(c => c.name === 'apple')).toBe(true);
+      expect(block.concepts.some(c => c.name === 'is')).toBe(true);
       expect(block.concepts.some(c => c.name === 'fruit')).toBe(true);
     });
 
@@ -251,8 +252,8 @@ orange is fruit`;
       const block = runner.getBlock();
       runner.getCompiler().compile('a is b');
 
-      expect(block.concepts).toHaveLength(2);
-      expect(block.concepts.map(c => c.name)).toEqual(['a', 'b']);
+      expect(block.concepts).toHaveLength(3);
+      expect(block.concepts.map(c => c.name)).toEqual(['a', 'is', 'b']);
       expect(block.chain).toHaveLength(1);
     });
 
@@ -260,9 +261,10 @@ orange is fruit`;
       const block = runner.getBlock();
       runner.getCompiler().compile('user-name is valid-identifier');
 
-      expect(block.concepts).toHaveLength(2);
+      expect(block.concepts).toHaveLength(3);
       expect(block.concepts.map(c => c.name)).toEqual([
         'user-name',
+        'is',
         'valid-identifier',
       ]);
       expect(block.chain).toHaveLength(1);
