@@ -33,7 +33,15 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
         return;
       }
     }
-    
+
+    // Handle incomplete relationships (just add concepts)
+    if (params.length < 3) {
+      params.forEach(concept => {
+        block.addConcept(concept);
+      });
+      return;
+    }
+
     // Handle "is <statement>" - evaluate whatever comes after 'is'
     if (params[0]?.name === 'is') {
       // Handle "is <statement>" - evaluate whatever comes after 'is'
@@ -154,7 +162,15 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
         return;
       }
     }
-    
+
+    // Handle incomplete relationships (just add concepts)
+    if (params.length < 3) {
+      params.forEach(concept => {
+        block.addConcept(concept);
+      });
+      return;
+    }
+
     // Handle "isnt <statement>" - evaluate whatever comes after 'isnt'
     if (params[0]?.name === 'isnt') {
       // Handle "isnt <statement>" - evaluate whatever comes after 'isnt'
