@@ -226,8 +226,10 @@ export class Block {
 
           // Skip inference for 'has' relationships to avoid unwanted transitive inference
           // But allow inference for property instances (concepts ending with '_of_')
-          if (dependentPairData?.relationshipType === 'has' && 
-              !dependentPair.conceptA.name.includes('_of_')) {
+          if (
+            dependentPairData?.relationshipType === 'has' &&
+            !dependentPair.conceptA.name.includes('_of_')
+          ) {
             continue;
           }
 

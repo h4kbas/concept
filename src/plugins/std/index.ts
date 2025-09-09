@@ -264,12 +264,32 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
         block.addConcept({ name: propertyInstanceName });
 
         // Create relationship: instance is property
-        block.addPair({ conceptA: { name: propertyInstanceName }, conceptB: { name: b.name } });
-        block.addData({ pair: { conceptA: { name: propertyInstanceName }, conceptB: { name: b.name } }, value: true, relationshipType: 'is' } as Data);
+        block.addPair({
+          conceptA: { name: propertyInstanceName },
+          conceptB: { name: b.name },
+        });
+        block.addData({
+          pair: {
+            conceptA: { name: propertyInstanceName },
+            conceptB: { name: b.name },
+          },
+          value: true,
+          relationshipType: 'is',
+        } as Data);
 
         // Create relationship: main concept has instance
-        block.addPair({ conceptA: { name: a.name }, conceptB: { name: propertyInstanceName } });
-        block.addData({ pair: { conceptA: { name: a.name }, conceptB: { name: propertyInstanceName } }, value: true, relationshipType: 'has' } as Data);
+        block.addPair({
+          conceptA: { name: a.name },
+          conceptB: { name: propertyInstanceName },
+        });
+        block.addData({
+          pair: {
+            conceptA: { name: a.name },
+            conceptB: { name: propertyInstanceName },
+          },
+          value: true,
+          relationshipType: 'has',
+        } as Data);
 
         return;
       }
