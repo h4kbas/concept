@@ -211,7 +211,7 @@ export class ConceptPluginManager implements PluginManager {
 
 const config: PluginConfig = {
   name: '${pluginName}',
-  version: '1.0.0',
+  version: '3.0.0',
   description: 'A concept language plugin',
   author: 'Your Name',
   license: 'MIT',
@@ -272,7 +272,7 @@ export default ${pluginName}Plugin;
     // Create package.json for the plugin
     const packageJson = {
       name: pluginName,
-      version: '1.0.0',
+      version: '3.0.0',
       description: 'A concept language plugin',
       main: 'index.js',
       types: 'index.d.ts',

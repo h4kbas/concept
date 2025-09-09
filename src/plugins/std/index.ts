@@ -542,7 +542,7 @@ export const createStdPlugin = (getBlock: () => Block): HookMap => ({
 export class StdPlugin implements ConceptPlugin {
   readonly config = {
     name: 'std',
-    version: '1.0.0',
+    version: '3.0.0',
     description: 'Standard library plugin with basic commands',
     main: 'index.js',
   };
