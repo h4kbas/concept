@@ -13,7 +13,7 @@ export class FilePlugin {
   };
 
   initialize?(): void | Promise<void> {}
-  setBlock?(block: any): void {}
+  setBlock?(_block: any): void {}
   cleanup?(): void | Promise<void> {}
 
   registerListeners(): Map<string, any> {
@@ -43,7 +43,7 @@ export const createFilePlugin = (getBlock: () => Block): HookMap => ({
     }
 
     // Skip the first "file" token and get the command
-    const command = params[1].name;
+    const command = params[1]?.name;
     const block = getBlock();
 
     switch (command) {
@@ -65,8 +65,14 @@ function handleRead(params: Concept[], block: Block): Concept[] | void {
     throw new Error('Usage: file read <filename> as <conceptName>');
   }
 
-  const filename = params[0].name;
-  const conceptName = params[2].name;
+  const filename = params[0]?.name;
+  const conceptName = params[2]?.name;
+
+  if (!filename || !conceptName) {
+    throw new Error(
+      'Invalid parameters: filename and conceptName are required'
+    );
+  }
 
   try {
     const filePath = path.resolve(filename);
@@ -238,8 +244,14 @@ function handleWrite(params: Concept[], block: Block): Concept[] | void {
     throw new Error('Usage: file write <conceptName> to <filename>');
   }
 
-  const conceptName = params[0].name;
-  const filename = params[2].name;
+  const conceptName = params[0]?.name;
+  const filename = params[2]?.name;
+
+  if (!conceptName || !filename) {
+    throw new Error(
+      'Invalid parameters: conceptName and filename are required'
+    );
+  }
 
   try {
     const concept = block.concepts.find((c: Concept) => c.name === conceptName);

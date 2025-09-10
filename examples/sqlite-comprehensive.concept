@@ -1,0 +1,34 @@
+# Comprehensive SQLite Plugin Test
+# Test all SQLite commands and functionality
+
+# Test 1: Basic database operations
+sqlite open test.db
+sqlite query CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, age INTEGER)
+sqlite query INSERT INTO users (name, email, age) VALUES ('Alice', 'alice@example.com', 25)
+sqlite query INSERT INTO users (name, email, age) VALUES ('Bob', 'bob@example.com', 30)
+sqlite query SELECT * FROM users
+sqlite query SELECT COUNT(*) as total_users FROM users
+sqlite close
+
+# Test 2: Concept-based operations
+sqlite open test2.db
+product has name
+product has price
+product has category
+name_of_product is Laptop
+price_of_product is 999
+category_of_product is Electronics
+sqlite create product
+sqlite insert product
+sqlite select product
+sqlite close
+
+# Test 3: Update and delete operations
+sqlite open test3.db
+sqlite query CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, quantity INTEGER)
+sqlite query INSERT INTO items (name, quantity) VALUES ('Apple', 10)
+sqlite query INSERT INTO items (name, quantity) VALUES ('Banana', 5)
+sqlite query UPDATE items SET quantity = 15 WHERE name = 'Apple'
+sqlite query DELETE FROM items WHERE name = 'Banana'
+sqlite query SELECT * FROM items
+sqlite close

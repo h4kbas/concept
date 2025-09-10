@@ -30,7 +30,7 @@ describe('ConceptRunner', () => {
 
     it('should initialize with plugins', async () => {
       const config: RunnerConfig = {
-        plugins: ['src/plugins/std/index.ts'],
+        plugins: ['dist/plugins/std/index.js'],
         watchMode: false,
         autoReload: false,
         logLevel: 'info',

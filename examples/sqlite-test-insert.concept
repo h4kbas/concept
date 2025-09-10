@@ -1,0 +1,4 @@
+# Test SQLite insert
+sqlite open test.db
+sqlite query INSERT INTO users (name, email) VALUES ('Alice', 'alice@example.com')
+sqlite close

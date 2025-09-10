@@ -1,0 +1,6 @@
+# Test SQLite with synchronous operations
+sqlite open test.db
+sqlite query CREATE TABLE IF NOT EXISTS test (id INTEGER, name TEXT)
+sqlite query INSERT INTO test VALUES (1, 'Hello')
+sqlite query SELECT * FROM test
+sqlite close

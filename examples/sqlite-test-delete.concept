@@ -1,0 +1,4 @@
+# Test SQLite delete
+sqlite open test.db
+sqlite query DELETE FROM product WHERE name = 'Laptop'
+sqlite close

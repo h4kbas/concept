@@ -1,0 +1,4 @@
+# Test SQLite with simple operations
+sqlite open test.db
+sqlite query CREATE TABLE IF NOT EXISTS users (id INTEGER, name TEXT)
+sqlite close

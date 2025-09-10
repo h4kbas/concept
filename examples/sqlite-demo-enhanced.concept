@@ -1,0 +1,24 @@
+# Enhanced SQLite Plugin Demo
+# This demonstrates the SQLite plugin with concept-based data access
+
+# Test 1: Basic SQL operations
+sqlite open demo.db
+sqlite query CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT, price REAL, category TEXT)
+sqlite query INSERT INTO products (name, price, category) VALUES ('Laptop', 999.99, 'Electronics')
+sqlite query INSERT INTO products (name, price, category) VALUES ('Book', 19.99, 'Education')
+sqlite query SELECT * FROM products
+sqlite query SELECT COUNT(*) as total_products FROM products
+sqlite close
+
+# Test 2: Concept-based operations
+sqlite open demo2.db
+product has name
+product has price
+product has category
+name_of_product is Smartphone
+price_of_product is 699.99
+category_of_product is Electronics
+sqlite create product
+sqlite insert product
+sqlite select product
+sqlite close

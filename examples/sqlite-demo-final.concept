@@ -1,0 +1,19 @@
+# SQLite Plugin Demo - Final Test
+# This demonstrates the SQLite plugin's capabilities
+
+# Test 1: Basic SQL operations
+sqlite open demo.db
+sqlite query CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT, price REAL)
+sqlite query INSERT INTO products (name, price) VALUES ('Laptop', 999.99)
+sqlite query INSERT INTO products (name, price) VALUES ('Book', 19.99)
+sqlite query SELECT * FROM products
+sqlite close
+
+# Test 2: Concept-based operations (these will work in separate executions)
+# user has name
+# user has email  
+# name_of_user is John
+# email_of_user is john@example.com
+# sqlite create user
+# sqlite insert user
+# sqlite select user

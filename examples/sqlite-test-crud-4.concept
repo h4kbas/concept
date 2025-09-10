@@ -1,0 +1,5 @@
+# Test 3d: Update data
+sqlite open test.db
+sqlite update product SET price = 899.99 WHERE id = 1
+sqlite select product
+sqlite close

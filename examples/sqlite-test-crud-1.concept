@@ -1,0 +1,7 @@
+# Test 3a: Create table using concept structure
+sqlite open test.db
+product has name
+product has price
+product has category
+sqlite create product
+sqlite close

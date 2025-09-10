@@ -1,0 +1,4 @@
+# Test 3c: Select data
+sqlite open test.db
+sqlite select product
+sqlite close

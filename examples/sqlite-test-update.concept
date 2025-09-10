@@ -1,0 +1,4 @@
+# Test SQLite update
+sqlite open test.db
+sqlite query UPDATE product SET price = 1099 WHERE name = 'Laptop'
+sqlite close

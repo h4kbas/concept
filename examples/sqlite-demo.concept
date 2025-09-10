@@ -1,0 +1,14 @@
+sqlite open test.db
+user has name
+user has email
+user has age
+user has role
+name_of_user is John
+email_of_user is john@example.com
+age_of_user is 30
+role_of_user is admin
+sqlite create user
+sqlite insert user
+sqlite select user
+sqlite query SELECT COUNT(*) as user_count FROM user
+sqlite close

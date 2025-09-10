@@ -1,0 +1,8 @@
+# Test SQLite concept table creation
+sqlite open test.db
+product has name
+product has price
+name_of_product is Laptop
+price_of_product is 999
+sqlite create product
+sqlite close

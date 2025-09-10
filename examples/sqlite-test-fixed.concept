@@ -1,0 +1,10 @@
+# Test fixed SQLite plugin - no _of_ columns
+sqlite open test.db
+user has name
+user has email
+user has age
+name_of_user is John
+email_of_user is john@example.com
+age_of_user is 30
+sqlite create user
+sqlite close

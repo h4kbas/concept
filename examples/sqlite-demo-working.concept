@@ -1,0 +1,7 @@
+# SQLite Plugin Demo - Working Test
+sqlite open demo.db
+sqlite query CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT, price REAL)
+sqlite query INSERT INTO products (name, price) VALUES ('Laptop', 999.99)
+sqlite query INSERT INTO products (name, price) VALUES ('Book', 19.99)
+sqlite query SELECT * FROM products
+sqlite close

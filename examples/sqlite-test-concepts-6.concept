@@ -1,0 +1,7 @@
+# Test 4f: Test concept creation and inspection
+sqlite open test.db
+sqlite query SELECT * FROM product
+inspect sql_query_result
+inspect row_1_of_sql_query_result
+inspect name_of_row_1_of_sql_query_result
+sqlite close

@@ -1,0 +1,5 @@
+# Test 3e: Delete data
+sqlite open test.db
+sqlite query DELETE FROM product WHERE id = 1
+sqlite query SELECT * FROM product
+sqlite close

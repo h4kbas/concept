@@ -1,0 +1,6 @@
+# Test 2c: Query data
+sqlite open test.db
+sqlite query SELECT * FROM users
+sqlite query SELECT COUNT(*) as user_count FROM users
+sqlite query SELECT name FROM users WHERE email LIKE '%example.com'
+sqlite close

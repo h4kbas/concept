@@ -1,0 +1,9 @@
+# Test 1: Basic SQLite Operations
+sqlite open test.db
+sqlite query CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)
+sqlite query INSERT INTO users (name, email) VALUES ('Alice', 'alice@example.com')
+sqlite query INSERT INTO users (name, email) VALUES ('Bob', 'bob@example.com')
+sqlite query SELECT * FROM users
+sqlite query SELECT COUNT(*) as user_count FROM users
+sqlite query SELECT name FROM users WHERE email LIKE '%example.com'
+sqlite close

@@ -1,0 +1,5 @@
+# Test 4d: Insert data
+sqlite open test.db
+sqlite query INSERT INTO product (name, price, category) VALUES ('Laptop', 999.99, 'Electronics')
+sqlite query INSERT INTO product (name, price, category) VALUES ('Book', 19.99, 'Education')
+sqlite close

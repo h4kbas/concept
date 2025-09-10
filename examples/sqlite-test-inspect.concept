@@ -1,0 +1,7 @@
+# Test SQLite query result access
+sqlite open test.db
+sqlite query SELECT * FROM users
+inspect users_query_result
+inspect row_1_of_users_query_result
+inspect name_of_row_1_of_users_query_result
+sqlite close

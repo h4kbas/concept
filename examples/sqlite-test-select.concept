@@ -1,0 +1,4 @@
+# Test SQLite select
+sqlite open test.db
+sqlite query SELECT * FROM users
+sqlite close

@@ -1,0 +1,10 @@
+# Test SQLite with concept-based operations
+sqlite open test.db
+user has name
+user has email
+name_of_user is Alice
+email_of_user is alice@example.com
+sqlite create user
+sqlite insert user
+sqlite select user
+sqlite close

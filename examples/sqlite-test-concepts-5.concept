@@ -1,0 +1,4 @@
+# Test 4e: Query data and test concept creation
+sqlite open test.db
+sqlite query SELECT * FROM product
+sqlite close

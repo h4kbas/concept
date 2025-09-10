@@ -1,0 +1,7 @@
+# Test 3b: Insert data using concept
+sqlite open test.db
+name_of_product is Laptop
+price_of_product is 999.99
+category_of_product is Electronics
+sqlite insert product
+sqlite close

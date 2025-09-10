@@ -1,0 +1,6 @@
+# Test 4a: Create data and test concept creation
+sqlite open test.db
+sqlite query INSERT INTO product (name, price, category) VALUES ('Laptop', 999.99, 'Electronics')
+sqlite query INSERT INTO product (name, price, category) VALUES ('Book', 19.99, 'Education')
+sqlite query SELECT * FROM product
+sqlite close

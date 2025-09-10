@@ -1,0 +1,7 @@
+# Test simple SQLite query with concept access
+sqlite open test.db
+sqlite query SELECT COUNT(*) as user_count FROM users
+inspect sql_query_result
+inspect row_count
+inspect query_sql
+sqlite close

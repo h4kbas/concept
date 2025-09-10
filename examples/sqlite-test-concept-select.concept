@@ -1,0 +1,4 @@
+# Test 6c: Select concept data
+sqlite open test.db
+sqlite select user
+sqlite close

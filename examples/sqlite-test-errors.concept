@@ -1,0 +1,6 @@
+# Test 5: Error handling
+sqlite open test.db
+sqlite query SELECT * FROM nonexistent_table
+sqlite query INVALID SQL SYNTAX
+sqlite select nonexistent_table
+sqlite close

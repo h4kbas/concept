@@ -1,0 +1,4 @@
+# Test fixed SQLite plugin - select data
+sqlite open test.db
+sqlite select user
+sqlite close
